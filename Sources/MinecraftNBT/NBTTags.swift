@@ -14,10 +14,15 @@ internal func makeTag(from data: DataStream,
     
     let type: NBTTagType = try forceType ?? data.read(NBTTagType.self)
 
-    if type == .end {
+    // Handle non-named tag-types
+    switch type {
+    case .end:
         return NBTEndTag()
+    default:
+        break
     }
     
+    // Handle named tag-types
     let name: String = try forceName ?? data.read(String.self)
 
     var tag: NBTTag
@@ -41,7 +46,7 @@ internal func makeTag(from data: DataStream,
     case .compound:
         tag = NBTCompoundTag()
     default:
-        print("Encountered type: \(type)")
+        assertionFailure("Encountered type: \(type)")
         exit(1)
     }
     
