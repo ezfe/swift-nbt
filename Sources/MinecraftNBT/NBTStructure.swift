@@ -7,17 +7,12 @@
 
 import Foundation
 import DataTools
-import Gzip
 
 public class NBTStructure {
     public let tag: NBTTag
     
-    public init(_ url: URL) throws {
-        let compressedData = try Data(contentsOf: url)
-        let data = try compressedData.gunzipped()
-//        let data = try Data(contentsOf: url)
+    public init(decompressed data: Data) throws {
         let stream = DataStream(data)
-        
         self.tag = try makeTag(from: stream)
     }
 }

@@ -1,5 +1,4 @@
 import Foundation
-//import Gzip
 import DataTools
 import MinecraftNBT
 

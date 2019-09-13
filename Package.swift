@@ -8,11 +8,10 @@ let package = Package(
         .library(name: "MinecraftNBT", targets: ["MinecraftNBT"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/1024jp/GzipSwift.git", from: "5.0.0")
+
     ],
     targets: [
-        .target(name: "MinecraftTools", dependencies: ["Gzip",
-                                                       "MinecraftNBT",
+        .target(name: "MinecraftTools", dependencies: ["MinecraftNBT",
                                                        "DataTools"]),
         
         .target(name: "DataTools"),
