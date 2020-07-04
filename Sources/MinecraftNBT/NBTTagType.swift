@@ -10,14 +10,14 @@ import DataTools
 
 public enum NBTTagType: Byte, DataStreamCreatable, CustomStringConvertible {
     public enum TagError: Error {
-        case invalidTagType
+        case invalidTagType(Byte)
     }
     
     public static func make(with stream: DataStream) throws -> NBTTagType {
         let byte = stream.next()
         
         guard let type = NBTTagType(rawValue: byte) else {
-            throw TagError.invalidTagType
+            throw TagError.invalidTagType(byte)
         }
         
         return type
@@ -35,6 +35,7 @@ public enum NBTTagType: Byte, DataStreamCreatable, CustomStringConvertible {
     case list = 9
     case compound = 10
     case intArray = 11
+    case longArray = 12
     
     public var description: String {
         switch self {
@@ -62,6 +63,8 @@ public enum NBTTagType: Byte, DataStreamCreatable, CustomStringConvertible {
             return "[string:*]"
         case .intArray:
             return "[int]"
+        case .longArray:
+            return "[long]"
         }
     }
 }

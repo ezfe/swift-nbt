@@ -2,6 +2,9 @@ import Foundation
 import DataTools
 import MinecraftNBT
 
-let structure = try NBTStructure(URL(fileURLWithPath: "/Users/ezekielelin/temp_dev/level.dat"))
+let url = URL(fileURLWithPath: "/Users/ezekiel/github-repositories/level.unzipped")
+let data = try Data(contentsOf: url)
+
+let structure = try NBTStructure(decompressed: data)
 
 structure.tag.display(indented: 0)

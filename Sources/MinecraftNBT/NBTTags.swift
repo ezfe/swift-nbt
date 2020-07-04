@@ -45,6 +45,10 @@ internal func makeTag(from data: DataStream,
         tag = NBTListTag()
     case .compound:
         tag = NBTCompoundTag()
+    case .intArray:
+        tag = NBTIntListTag()
+    case .longArray:
+        tag = NBTLongListTag()
     default:
         assertionFailure("Encountered type: \(type)")
         exit(1)
@@ -250,14 +254,14 @@ public final class NBTByteListTag: NBTTag, NBTContainerTag {
     public var contents: [Byte]
     
     public var valueString: String {
-        return "(\(self.contents.count) items)"
+        return "(\(self.contents.count) byte items)"
     }
     
     public var count: Int { return self.contents.count }
     
     init(name: String = "", contents: [Byte] = []) {
         self.name = name
-        self.contents = [Byte]()
+        self.contents = contents
     }
     
     public func load(from stream: DataStream) throws {
@@ -280,6 +284,79 @@ public final class NBTByteListTag: NBTTag, NBTContainerTag {
     }
 }
 
+public final class NBTIntListTag: NBTTag, NBTContainerTag {
+    public let type: NBTTagType = .intArray
+    public var name: String
+    
+    public var contents: [Int32]
+    
+    public var valueString: String {
+        return "(\(self.contents.count) int32 items)"
+    }
+    
+    public var count: Int { return self.contents.count }
+    
+    init(name: String = "", contents: [Int32] = []) {
+        self.name = name
+        self.contents = contents
+    }
+    
+    public func load(from stream: DataStream) throws {
+        let length = try stream.read(Int32.self)
+        contents.removeAll()
+        contents.reserveCapacity(Int(length))
+        
+        for _ in 0..<length {
+            try contents.append(stream.read(Int32.self))
+        }
+    }
+    
+    public func display(indented indentation: Int) {
+        print(String(repeating: "\t", count: indentation), terminator: "")
+        print("[\(name)/\(type):")
+        for int in contents {
+            print(String(repeating: "\t", count: indentation + 1), terminator: "")
+            print(int)
+        }
+    }
+}
+
+public final class NBTLongListTag: NBTTag, NBTContainerTag {
+    public let type: NBTTagType = .longArray
+    public var name: String
+    
+    public var contents: [Int64]
+    
+    public var valueString: String {
+        return "(\(self.contents.count) int64 items)"
+    }
+    
+    public var count: Int { return self.contents.count }
+    
+    init(name: String = "", contents: [Int64] = []) {
+        self.name = name
+        self.contents = contents
+    }
+    
+    public func load(from stream: DataStream) throws {
+        let length = try stream.read(Int64.self)
+        contents.removeAll()
+        contents.reserveCapacity(Int(length))
+        
+        for _ in 0..<length {
+            try contents.append(stream.read(Int64.self))
+        }
+    }
+    
+    public func display(indented indentation: Int) {
+        print(String(repeating: "\t", count: indentation), terminator: "")
+        print("[\(name)/\(type):")
+        for long in contents {
+            print(String(repeating: "\t", count: indentation + 1), terminator: "")
+            print(long)
+        }
+    }
+}
 
 public final class NBTStringTag: NBTTag {
     public let type: NBTTagType = .string
