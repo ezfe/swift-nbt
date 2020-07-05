@@ -5,5 +5,5 @@ import MinecraftNBT
 let url = URL(fileURLWithPath: "/Users/ezekiel/github-repositories/level.unzipped")
 let data = try Data(contentsOf: url)
 
-let structure = try NBTStructure(decompressed: data)
+let structure = NBTStructure(decompressed: data)
 //print(structure)

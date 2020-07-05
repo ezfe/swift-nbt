@@ -11,7 +11,7 @@ import DataTools
 public struct NBTStructure {
     public var tag: Compound
     
-    public init(decompressed data: Data) throws {
+    public init(decompressed data: Data) {
         let stream = DataStream(data)
         self.tag = Compound.make(with: stream)
     }
