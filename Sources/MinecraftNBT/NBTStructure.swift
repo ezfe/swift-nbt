@@ -9,10 +9,10 @@ import Foundation
 import DataTools
 
 public class NBTStructure {
-    public let tag: NBTTag
+    public let tag: Compound
     
     public init(decompressed data: Data) throws {
         let stream = DataStream(data)
-        self.tag = try makeTag(from: stream)
+        self.tag = Compound.make(with: stream)
     }
 }

@@ -8,8 +8,8 @@
 import Foundation
 
 
-extension Byte: DataStreamCreatable {
-    public static func make(with stream: DataStream) -> Byte {
+extension UInt8: DataStreamCreatable {
+    public static func make(with stream: DataStream) -> UInt8 {
         return stream.next()
     }
 }
@@ -53,47 +53,54 @@ extension UInt64: DataStreamCreatable {
     }
 }
 
+extension Int8: DataStreamCreatable {
+    public static func make(with stream: DataStream) -> Int8 {
+        let bits = stream.read(UInt8.self)
+        return Int8(bitPattern: bits)
+    }
+}
+
 extension Int16: DataStreamCreatable {
-    public static func make(with stream: DataStream) throws -> Int16 {
-        let bits = try stream.read(UInt16.self)
+    public static func make(with stream: DataStream) -> Int16 {
+        let bits = stream.read(UInt16.self)
         return Int16(bitPattern: bits)
     }
 }
 
 extension Int32: DataStreamCreatable {
-    public static func make(with stream: DataStream) throws -> Int32 {
-        let bits = try stream.read(UInt32.self)
+    public static func make(with stream: DataStream) -> Int32 {
+        let bits = stream.read(UInt32.self)
         return Int32(bitPattern: bits)
     }
 }
 
 extension Int64: DataStreamCreatable {
-    public static func make(with stream: DataStream) throws -> Int64 {
-        let bits = try stream.read(UInt64.self)
+    public static func make(with stream: DataStream) -> Int64 {
+        let bits = stream.read(UInt64.self)
         return Int64(bitPattern: bits)
     }
 }
 
-extension Float: DataStreamCreatable {
-    public static func make(with stream: DataStream) throws -> Float {
-        let bits = try stream.read(UInt32.self)
-        return Float(bitPattern: bits)
+extension Float32: DataStreamCreatable {
+    public static func make(with stream: DataStream) -> Float32 {
+        let bits = stream.read(UInt32.self)
+        return Float32(bitPattern: bits)
     }
 }
 
-extension Double: DataStreamCreatable {
-    public static func make(with stream: DataStream) throws -> Double {
-        let bits = try stream.read(UInt64.self)
-        return Double(bitPattern: bits)
+extension Float64: DataStreamCreatable {
+    public static func make(with stream: DataStream) -> Float64 {
+        let bits = stream.read(UInt64.self)
+        return Float64(bitPattern: bits)
     }
 }
 
 extension String: DataStreamCreatable {
-    public static func make(with stream: DataStream) throws -> String {
-        let length = try stream.read(UInt16.self)
+    public static func make(with stream: DataStream) -> String {
+        let length = stream.read(UInt16.self)
         
         var accumulate = [Character]()
-        var carryOverByte: Byte? = nil
+        var carryOverByte: UInt8? = nil
         for _ in 0..<length {
             let byte = stream.next()
             
