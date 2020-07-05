@@ -6,5 +6,4 @@ let url = URL(fileURLWithPath: "/Users/ezekiel/github-repositories/level.unzippe
 let data = try Data(contentsOf: url)
 
 let structure = try NBTStructure(decompressed: data)
-print(structure)
-//structure.tag.display(indented: 0)
+//print(structure)

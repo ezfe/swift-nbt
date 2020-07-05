@@ -120,6 +120,14 @@ extension SpecializedArray {
 public struct Compound: Tag, DataStreamCreatable {
     public var contents: [String: Tag]
 
+    public init() {
+        self.contents = [:]
+    }
+    
+    public init(contents: [String: Tag]) {
+        self.contents = contents
+    }
+    
     public static func make(with stream: DataStream) -> Compound {
         var contents = [String: Tag]()
         

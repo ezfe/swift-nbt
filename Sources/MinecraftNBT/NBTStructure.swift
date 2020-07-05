@@ -8,11 +8,15 @@
 import Foundation
 import DataTools
 
-public class NBTStructure {
-    public let tag: Compound
+public struct NBTStructure {
+    public var tag: Compound
     
     public init(decompressed data: Data) throws {
         let stream = DataStream(data)
         self.tag = Compound.make(with: stream)
+    }
+    
+    public init() {
+        self.tag = Compound()
     }
 }
