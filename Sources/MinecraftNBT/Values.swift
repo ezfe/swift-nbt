@@ -118,14 +118,31 @@ extension SpecializedArray {
 // MARK:- Compound
 
 public struct Compound: Tag, DataStreamCreatable {
-    public var contents: [String: Tag]
-
-    public init() {
-        self.contents = [:]
+    public struct Pair {
+        let key: String
+        let value: Tag
     }
     
-    public init(contents: [String: Tag]) {
+    public private(set) var contents: [Pair]
+
+    public init() {
+        self.contents = []
+    }
+    
+    public init(contents: [Pair]) {
         self.contents = contents
+    }
+    
+    subscript(key: String) -> Tag? {
+        set {
+            self.contents.removeAll { $0.key == key }
+            if let newValue = newValue {
+                self.contents.append(Pair(key: key, value: newValue))
+            }
+        }
+        get {
+            return self.contents.first { $0.key == key }?.value
+        }
     }
     
     public static func make(with stream: DataStream) -> Compound {
@@ -156,8 +173,9 @@ public struct Compound: Tag, DataStreamCreatable {
             contents[name] = payload
         }
         
-        
-        return Compound(contents: contents)
+        return Compound(contents: contents
+                            .map({ Pair(key: $0.key, value: $0.value) })
+                            .sorted(by: { $0.key > $1.key }))
     }
 }
 
