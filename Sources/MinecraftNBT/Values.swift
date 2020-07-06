@@ -123,7 +123,7 @@ public struct Compound: Tag, DataStreamCreatable {
         let value: Tag
     }
     
-    public private(set) var contents: [Pair]
+    public var contents: [Pair]
 
     public init() {
         self.contents = []
