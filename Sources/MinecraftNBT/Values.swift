@@ -119,8 +119,8 @@ extension SpecializedArray {
 
 public struct Compound: Tag, DataStreamCreatable {
     public struct Pair {
-        let key: String
-        let value: Tag
+        public let key: String
+        public let value: Tag
     }
     
     public var contents: [Pair]
