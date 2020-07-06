@@ -16,7 +16,7 @@ public struct NBTStructure {
         self.tag = Compound.make(with: stream)
     }
     
-    public init() {
-        self.tag = Compound()
+    public init(tag: Compound = Compound()) {
+        self.tag = tag
     }
 }
