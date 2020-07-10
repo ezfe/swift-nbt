@@ -8,11 +8,21 @@
 import Foundation
 import DataTools
 
-public class NBTStructure {
-    public let tag: NBTTag
+public struct NBTStructure {
+    public var tag: Compound
     
-    public init(decompressed data: Data) throws {
+    public init(decompressed data: Data) {
         let stream = DataStream(data)
-        self.tag = try makeTag(from: stream)
+        self.tag = Compound.make(with: stream)
+    }
+    
+    public init(tag: Compound = Compound()) {
+        self.tag = tag
+    }
+
+    public var data: Data {
+        let acc = DataAccumulator()
+        self.tag.append(to: acc)
+        return acc.data
     }
 }

@@ -7,23 +7,6 @@
 
 import Foundation
 
-public typealias Byte = UInt8
-extension Data {
-    func bytes() -> [Byte] {
-        var byteArray = Array<Byte>(repeating: 0, count: self.count)
-        self.copyBytes(to: &byteArray, count: self.count)
-        return byteArray
-    }
-    
-    func bytes(in range: Range<Data.Index>) -> [Byte] {
-        return self.subdata(in: range).bytes()
-    }
-    
-    func byte(at index: Data.Index) -> Byte {
-        return self.bytes(in: index..<(index+1))[0]
-    }
-}
-
 public class DataStream {
     public private(set) var data: Data
     private var byteNumber: Int
@@ -35,21 +18,32 @@ public class DataStream {
         self.iterator = data.makeIterator()
     }
     
-    public func read<Type>(_ type: Type.Type) throws -> Type where Type: DataStreamCreatable {
-        return try type.make(with: self)
+    public func read<Type>(_ type: Type.Type) -> Type where Type: DataStreamReadable {
+        return type.make(with: self)
     }
     
-    public func next() -> Byte {
+    public func next() -> UInt8 {
         byteNumber += 1
         return iterator.next() ?? 0
     }
 }
 
-public protocol DataStreamLoadable {
-    func load(from stream: DataStream) throws
+public class DataAccumulator {
+    public private(set) var data: Data
+
+    public init() {
+        self.data = Data()
+    }
+
+    public func append(data new: Data) {
+        self.data.append(new)
+    }
 }
 
-public protocol DataStreamCreatable {
-    static func make(with stream: DataStream) throws -> Self
+public protocol DataStreamReadable {
+    static func make(with stream: DataStream) -> Self
 }
 
+public protocol DataAccumulatorWritable {
+    func append(to accumulator: DataAccumulator)
+}

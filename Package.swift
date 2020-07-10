@@ -16,5 +16,9 @@ let package = Package(
         
         .target(name: "DataTools"),
         .target(name: "MinecraftNBT", dependencies: ["DataTools"]),
+
+        .testTarget(
+            name: "MinecraftToolsTests",
+            dependencies: ["MinecraftNBT", "DataTools"]),
     ]
 )

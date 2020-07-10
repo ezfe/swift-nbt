@@ -8,21 +8,7 @@
 import Foundation
 import DataTools
 
-public enum NBTTagType: Byte, DataStreamCreatable, CustomStringConvertible {
-    public enum TagError: Error {
-        case invalidTagType(Byte)
-    }
-    
-    public static func make(with stream: DataStream) throws -> NBTTagType {
-        let byte = stream.next()
-        
-        guard let type = NBTTagType(rawValue: byte) else {
-            throw TagError.invalidTagType(byte)
-        }
-        
-        return type
-    }
-    
+public enum NBTTagType: Int8, CustomStringConvertible {
     case end = 0
     case byte = 1
     case short = 2

@@ -2,9 +2,9 @@ import Foundation
 import DataTools
 import MinecraftNBT
 
-let url = URL(fileURLWithPath: "/Users/ezekiel/github-repositories/level.unzipped")
+let url = URL(fileURLWithPath: "/Users/ezekielelin/temp_dev/level.dat.decompressed")
 let data = try Data(contentsOf: url)
 
-let structure = try NBTStructure(decompressed: data)
+let structure = NBTStructure(decompressed: data)
 
-structure.tag.display(indented: 0)
+try structure.data.write(to: URL(fileURLWithPath: "/Users/ezekielelin/temp_dev/level_rewrite.dat.decompressed"))
