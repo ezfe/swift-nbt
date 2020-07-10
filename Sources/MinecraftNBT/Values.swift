@@ -40,10 +40,7 @@ func readPayload(type: NBTTagType, stream: DataStream) -> Tag {
         return Compound.make(with: stream)
                     
     case .end:
-        
-        // TODO: Get rid of this?
         return End()
-
     }
 }
 
@@ -57,7 +54,7 @@ struct End: Tag { }
 
 // MARK:- Lists
 
-public struct GenericList: Tag, DataStreamCreatable {
+public struct GenericList: Tag, DataStreamReadable {
     public var type: NBTTagType
     public var elements: [Tag]
     
@@ -80,8 +77,8 @@ public struct GenericList: Tag, DataStreamCreatable {
     }
 }
 
-protocol SpecializedArray: Tag, DataStreamCreatable {
-    associatedtype SType where SType: DataStreamCreatable
+protocol SpecializedArray: Tag, DataStreamReadable {
+    associatedtype SType where SType: DataStreamReadable
     
     var elements: [SType] { get set }
     
@@ -117,7 +114,7 @@ extension SpecializedArray {
 
 // MARK:- Compound
 
-public struct Compound: Tag, DataStreamCreatable {
+public struct Compound: Tag, DataStreamReadable {
     public struct Pair {
         public let key: String
         public let value: Tag
@@ -155,18 +152,14 @@ public struct Compound: Tag, DataStreamCreatable {
                 break
             }
             
-            let name: String
             if type == .end {
                 break
             }
             
-            name = stream.read(String.self)
-            
+            let name = stream.read(String.self)
             let payload = readPayload(type: type, stream: stream)
             
             if let _ = payload as? End {
-                print("Illegal State: End Payload Found")
-                exit(3)
                 break
             }
             

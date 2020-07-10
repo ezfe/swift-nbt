@@ -8,21 +8,31 @@
 import Foundation
 
 
-extension UInt8: DataStreamCreatable {
+extension UInt8: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> UInt8 {
         return stream.next()
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        accumulator.append(data: Data([self]))
+    }
 }
 
-extension UInt16: DataStreamCreatable {
+extension UInt16: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> UInt16 {
         let most = stream.next()
         let least = stream.next()
         return (UInt16(most) << 8) + UInt16(least)
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        withUnsafeBytes(of: self.bigEndian) { ptr in
+            accumulator.append(data: Data(ptr))
+        }
+    }
 }
 
-extension UInt32: DataStreamCreatable {
+extension UInt32: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> UInt32 {
         let a = stream.next()
         let b = stream.next()
@@ -34,9 +44,15 @@ extension UInt32: DataStreamCreatable {
         
         return UInt32(bigEndian: data.withUnsafeBytes { $0.load(as: self) })
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        withUnsafeBytes(of: self.bigEndian) { ptr in
+            accumulator.append(data: Data(ptr))
+        }
+    }
 }
 
-extension UInt64: DataStreamCreatable {
+extension UInt64: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> UInt64 {
         let a = stream.next()
         let b = stream.next()
@@ -51,77 +67,98 @@ extension UInt64: DataStreamCreatable {
         let data = Data(arr)
         return UInt64(bigEndian: data.withUnsafeBytes { $0.load(as: self) })
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        withUnsafeBytes(of: self.bigEndian) { ptr in
+            accumulator.append(data: Data(ptr))
+        }
+    }
 }
 
-extension Int8: DataStreamCreatable {
+extension Int8: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> Int8 {
         let bits = stream.read(UInt8.self)
         return Int8(bitPattern: bits)
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        withUnsafeBytes(of: self.bigEndian) { ptr in
+            accumulator.append(data: Data(ptr))
+        }
+    }
 }
 
-extension Int16: DataStreamCreatable {
+extension Int16: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> Int16 {
         let bits = stream.read(UInt16.self)
         return Int16(bitPattern: bits)
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        withUnsafeBytes(of: self.bigEndian) { ptr in
+            accumulator.append(data: Data(ptr))
+        }
+    }
 }
 
-extension Int32: DataStreamCreatable {
+extension Int32: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> Int32 {
         let bits = stream.read(UInt32.self)
         return Int32(bitPattern: bits)
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        withUnsafeBytes(of: self.bigEndian) { ptr in
+            accumulator.append(data: Data(ptr))
+        }
+    }
 }
 
-extension Int64: DataStreamCreatable {
+extension Int64: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> Int64 {
         let bits = stream.read(UInt64.self)
         return Int64(bitPattern: bits)
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        withUnsafeBytes(of: self.bigEndian) { ptr in
+            accumulator.append(data: Data(ptr))
+        }
+    }
 }
 
-extension Float32: DataStreamCreatable {
+extension Float32: DataStreamReadable {
     public static func make(with stream: DataStream) -> Float32 {
         let bits = stream.read(UInt32.self)
         return Float32(bitPattern: bits)
     }
 }
 
-extension Float64: DataStreamCreatable {
+extension Float64: DataStreamReadable {
     public static func make(with stream: DataStream) -> Float64 {
         let bits = stream.read(UInt64.self)
         return Float64(bitPattern: bits)
     }
 }
 
-extension String: DataStreamCreatable {
+extension String: DataStreamReadable, DataStreamWritable {
     public static func make(with stream: DataStream) -> String {
         let length = stream.read(UInt16.self)
-        
-        var accumulate = [Character]()
-        var carryOverByte: UInt8? = nil
+
+        var accumulate = [UInt8]()
         for _ in 0..<length {
-            let byte = stream.next()
-            
-            if let a = carryOverByte {
-                let combinedByte = ((a & 0x1F) << 6) | (byte & 0x3F)
-                let scalar = UnicodeScalar(combinedByte)
-                accumulate.append(Character(scalar))
-                
-                carryOverByte = nil
-                continue
-            }
-            
-            if (byte >> 7) & 0b1 == 0 {
-                let scalar = UnicodeScalar(byte)
-                accumulate.append(Character(scalar))
-            } else if (byte >> 5) & 0b111 == 0b110 {
-                carryOverByte = byte
-            }
+            accumulate.append(stream.read(UInt8.self))
         }
-        
-        let string = String(accumulate)
-        return string
+
+        let data = Data(accumulate)
+        return String(data: data, encoding: .utf8)!
+    }
+
+    public func append(to accumulator: DataAccumulator) {
+        let data = self.data(using: .utf8)!
+        let length = data.count
+
+        Int16(length).append(to: accumulator)
+        accumulator.append(data: data)
     }
 }
