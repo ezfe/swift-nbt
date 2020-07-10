@@ -44,6 +44,6 @@ public protocol DataStreamReadable {
     static func make(with stream: DataStream) -> Self
 }
 
-public protocol DataStreamWritable {
+public protocol DataAccumulatorWritable {
     func append(to accumulator: DataAccumulator)
 }

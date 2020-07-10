@@ -19,4 +19,10 @@ public struct NBTStructure {
     public init(tag: Compound = Compound()) {
         self.tag = tag
     }
+
+    public var data: Data {
+        let acc = DataAccumulator()
+        self.tag.append(to: acc)
+        return acc.data
+    }
 }

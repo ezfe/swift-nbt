@@ -22,7 +22,7 @@ func readPayload(type: NBTTagType, stream: DataStream) -> Tag {
         return Value(value: .float32(stream.read(Float32.self)))
     case .double:
         return Value(value: .float64(stream.read(Float64.self)))
-    
+
     case .string:
         return Value(value: .string(stream.read(String.self)))
         
@@ -38,7 +38,7 @@ func readPayload(type: NBTTagType, stream: DataStream) -> Tag {
         
     case .compound:
         return Compound.make(with: stream)
-                    
+
     case .end:
         return End()
     }
@@ -46,16 +46,24 @@ func readPayload(type: NBTTagType, stream: DataStream) -> Tag {
 
 // MARK:-
 
-public protocol Tag {
-
+public protocol Tag: DataAccumulatorWritable {
+    var type: NBTTagType { get }
 }
 
-struct End: Tag { }
+struct End: Tag {
+    let type = NBTTagType.end
+
+    func append(to accumulator: DataAccumulator) {
+        self.type.rawValue.append(to: accumulator)
+    }
+}
 
 // MARK:- Lists
 
 public struct GenericList: Tag, DataStreamReadable {
-    public var type: NBTTagType
+    public let type = NBTTagType.list
+
+    public var genericType: NBTTagType
     public var elements: [Tag]
     
     public static func make(with stream: DataStream) -> GenericList {
@@ -73,12 +81,21 @@ public struct GenericList: Tag, DataStreamReadable {
             elements.append(readPayload(type: type, stream: stream))
         }
         
-        return GenericList(type: type, elements: elements)
+        return GenericList(genericType: type, elements: elements)
+    }
+
+    public func append(to accumulator: DataAccumulator) {
+        self.genericType.rawValue.append(to: accumulator)
+        Int32(self.elements.count).append(to: accumulator)
+
+        for tag in self.elements {
+            tag.append(to: accumulator)
+        }
     }
 }
 
 protocol SpecializedArray: Tag, DataStreamReadable {
-    associatedtype SType where SType: DataStreamReadable
+    associatedtype SType where SType: DataStreamReadable & DataAccumulatorWritable
     
     var elements: [SType] { get set }
     
@@ -86,14 +103,17 @@ protocol SpecializedArray: Tag, DataStreamReadable {
 }
 
 public struct ByteArray: SpecializedArray {
+    public let type = NBTTagType.byteArray
     public var elements: [Int8]
 }
 
 public struct IntArray: SpecializedArray {
+    public let type = NBTTagType.intArray
     public var elements: [Int32]
 }
 
 public struct LongArray: SpecializedArray {
+    public let type = NBTTagType.longArray
     public var elements: [Int64]
 }
 
@@ -110,16 +130,23 @@ extension SpecializedArray {
         
         return .init(elements: storage)
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        Int32(self.elements.count).append(to: accumulator)
+        self.elements.forEach { $0.append(to: accumulator) }
+    }
 }
 
 // MARK:- Compound
 
-public struct Compound: Tag, DataStreamReadable {
+public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
     public struct Pair {
         public let key: String
         public let value: Tag
     }
-    
+
+    public let type = NBTTagType.compound
+
     public var contents: [Pair]
 
     public init() {
@@ -170,11 +197,44 @@ public struct Compound: Tag, DataStreamReadable {
                             .map({ Pair(key: $0.key, value: $0.value) })
                             .sorted(by: { $0.key > $1.key }))
     }
+
+    public func append(to accumulator: DataAccumulator) {
+        for pair in self.contents {
+            let name = pair.key
+            let tag = pair.value
+
+            tag.type.rawValue.append(to: accumulator)
+            name.append(to: accumulator)
+            tag.append(to: accumulator)
+        }
+        End().append(to: accumulator)
+    }
 }
 
 // MARK:- Generic
 
 public struct Value: Tag {
+    public var type: NBTTagType {
+        switch self.value {
+        case .int8(_):
+            return .byte
+        case .int16(_):
+            return .short
+        case .int32(_):
+            return .int
+        case .int64(_):
+            return .long
+
+        case .float32(_):
+            return .float
+        case .float64(_):
+            return .double
+
+        case .string(_):
+            return .string
+        }
+    }
+
     public let value: MinecraftValue
     
     public enum MinecraftValue {
@@ -187,5 +247,26 @@ public struct Value: Tag {
         case float64(Float64)
         
         case string(String)
+    }
+
+    public func append(to accumulator: DataAccumulator) {
+        switch self.value {
+        case .int8(let v):
+            v.append(to: accumulator)
+        case .int16(let v):
+            v.append(to: accumulator)
+        case .int32(let v):
+            v.append(to: accumulator)
+        case .int64(let v):
+            v.append(to: accumulator)
+
+        case .float32(let v):
+            v.append(to: accumulator)
+        case .float64(let v):
+            v.append(to: accumulator)
+
+        case .string(let v):
+            v.append(to: accumulator)
+        }
     }
 }
