@@ -14,13 +14,15 @@ let package = Package(
 		
 	],
 	targets: [
-		.executableTarget(name: "MinecraftTools", dependencies: ["MinecraftNBT", "DataTools"]),
-		
-			.target(name: "DataTools"),
+		// Data Tools
+		.target(name: "DataTools"),
+		.testTarget(name: "DataToolsTests", dependencies: ["DataTools"]),
+		// NBT (Encoders, Decoders, Tags, Types, etc.)
 		.target(name: "MinecraftNBT", dependencies: ["DataTools"]),
-		
-			.testTarget(
-				name: "MinecraftToolsTests",
-				dependencies: ["MinecraftNBT", "DataTools"]),
+		.testTarget(name: "MinecraftNBTTests", dependencies: ["MinecraftNBT"]),
+		// NBT Structures
+		.target(name: "NBTStructures"),
+		// Executable
+		.executableTarget(name: "MinecraftTools", dependencies: ["MinecraftNBT", "DataTools", "NBTStructures"]),
 	]
 )

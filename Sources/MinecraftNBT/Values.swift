@@ -76,7 +76,12 @@ struct End: Tag {
 
 // MARK:- Lists
 
-public struct GenericList: Tag, DataStreamReadable {
+public protocol AnyList: Tag, DataStreamReadable {
+	associatedtype Element
+	var elements: [Element] { get }
+}
+
+public struct GenericList: AnyList {
 	public let type = NBTTagType.list
 	
 	public var genericType: NBTTagType
@@ -119,7 +124,7 @@ public struct GenericList: Tag, DataStreamReadable {
 	}
 }
 
-protocol SpecializedArray: Tag, DataStreamReadable {
+protocol SpecializedArray: AnyList {
 	associatedtype SType where SType: DataStreamReadable & DataAccumulatorWritable
 	
 	var elements: [SType] { get set }
@@ -353,4 +358,75 @@ public struct StringValue: SpecializedValue {
 	public init(value: String) {
 		self.value = value
 	}
+}
+
+// MARK: Resizability
+
+public protocol Int8Resizable {
+	var int8: Int8 { get }
+}
+public protocol Int16Resizable {
+	var int16: Int16 { get }
+}
+public protocol Int32Resizable {
+	var int32: Int32 { get }
+}
+public protocol Int64Resizable {
+	var int64: Int64 { get }
+}
+
+public protocol UInt8Resizable {
+	var uint8: UInt8 { get }
+}
+public protocol UInt16Resizable {
+	var uint16: UInt16 { get }
+}
+public protocol UInt32Resizable {
+	var uint32: UInt32 { get }
+}
+public protocol UInt64Resizable {
+	var uint64: UInt64 { get }
+}
+
+extension ByteValue: Int8Resizable, Int16Resizable, Int32Resizable, Int64Resizable {
+	public var int8: Int8 { value }
+	public var int16: Int16 { Int16(value) }
+	public var int32: Int32 { Int32(value) }
+	public var int64: Int64 { Int64(value) }
+}
+extension ByteValue: UInt8Resizable, UInt16Resizable, UInt32Resizable, UInt64Resizable {
+	public var uint8: UInt8 { UInt8(value) }
+	public var uint16: UInt16 { UInt16(value) }
+	public var uint32: UInt32 { UInt32(value) }
+	public var uint64: UInt64 { UInt64(value) }
+}
+
+extension ShortValue: Int16Resizable, Int32Resizable, Int64Resizable {
+	public var int16: Int16 { value }
+	public var int32: Int32 { Int32(value) }
+	public var int64: Int64 { Int64(value) }
+}
+extension ShortValue: UInt8Resizable, UInt16Resizable, UInt32Resizable, UInt64Resizable {
+	public var uint8: UInt8 { UInt8(value) }
+	public var uint16: UInt16 { UInt16(value) }
+	public var uint32: UInt32 { UInt32(value) }
+	public var uint64: UInt64 { UInt64(value) }
+}
+
+extension IntValue: Int32Resizable, Int64Resizable {
+	public var int32: Int32 { value }
+	public var int64: Int64 { Int64(value) }
+}
+extension IntValue: UInt16Resizable, UInt32Resizable, UInt64Resizable {
+	public var uint16: UInt16 { UInt16(value) }
+	public var uint32: UInt32 { UInt32(value) }
+	public var uint64: UInt64 { UInt64(value) }
+}
+
+extension LongValue: Int64Resizable {
+	public var int64: Int64 { value }
+}
+extension LongValue: UInt32Resizable, UInt64Resizable {
+	public var uint32: UInt32 { UInt32(value) }
+	public var uint64: UInt64 { UInt64(value) }
 }

@@ -26,11 +26,11 @@ public struct NBTStructure {
 		return acc.data
 	}
 
-	public func read(_ keypath: String...) throws -> Tag? {
+	public func read(_ keypath: [String]) throws -> Tag? {
 		return try traverse(keypath).1
 	}
 		
-	public mutating func write(_ value: Tag, to keypath: String...) throws {
+	public mutating func write(_ value: Tag, to keypath: [String]) throws {
 		//"", "Data", "DataPacks", "Enabled", "0"
 		var (tags, _) = try traverse(keypath)
 
@@ -91,6 +91,10 @@ public struct NBTStructure {
 	}
 		
 	private func traverse(_ keypath: [String]) throws -> ([Tag], Tag?) {
+		if keypath.count == 0 {
+			return ([], tag)
+		}
+
 		var workingTag: Tag = self.tag
 		var accumulator: [Tag] = [workingTag]
 		for key in keypath.dropLast(1) {
