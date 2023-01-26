@@ -3,7 +3,7 @@ import DataTools
 import MinecraftNBT
 import NBTStructures
 
-let url = URL(filePath: "/Users/ezekielelin/Library/Application Support/minecraft/saves/New World/level copy")
+let url = URL(fileURLWithPath: "/Users/ezekielelin/Library/Application Support/minecraft/saves/New World/level copy")
 let data = try Data(contentsOf: url)
 
 var structure = NBTStructure(decompressed: data)
