@@ -8,45 +8,9 @@
 import Foundation
 import DataTools
 
-func readPayload(type: NBTTagType, stream: DataStream) -> Tag {
-	switch type {
-		case .byte:
-			return ByteValue(value: stream.read(Int8.self))
-		case .short:
-			return ShortValue(value: stream.read(Int16.self))
-		case .int:
-			return IntValue(value: stream.read(Int32.self))
-		case .long:
-			return LongValue(value: stream.read(Int64.self))
-		case .float:
-			return FloatValue(value: stream.read(Float32.self))
-		case .double:
-			return DoubleValue(value: stream.read(Float64.self))
-			
-		case .string:
-			return StringValue(value: stream.read(String.self))
-			
-		case .list:
-			return GenericList.make(with: stream)
-			
-		case .byteArray:
-			return ByteArray.make(with: stream)
-		case .intArray:
-			return IntArray.make(with: stream)
-		case .longArray:
-			return LongArray.make(with: stream)
-			
-		case .compound:
-			return Compound.make(with: stream)
-			
-		case .end:
-			return End()
-	}
-}
-
 // MARK:-
 
-public protocol Tag: DataAccumulatorWritable, CustomStringConvertible {
+public protocol Tag: DataAccumulatorWritable, CustomStringConvertible, Equatable {
 	var type: NBTTagType { get }
 	
 	func description(indentation: UInt) -> String
@@ -55,6 +19,41 @@ public protocol Tag: DataAccumulatorWritable, CustomStringConvertible {
 extension Tag {
 	internal func makeIndent(_ quantity: UInt) -> String {
 		return String(repeating: " ", count: 3 * Int(quantity))
+	}
+	
+	public func equal(to otherTag: any Tag) -> Bool {
+		guard self.type == otherTag.type else {
+			return false
+		}
+		
+		switch self.type {
+			case .end:
+				return (self as? End) == (otherTag as? End)
+			case .byte:
+				return (self as? ByteValue) == (otherTag as? ByteValue)
+			case .short:
+				return (self as? ShortValue) == (otherTag as? ShortValue)
+			case .int:
+				return (self as? IntValue) == (otherTag as? IntValue)
+			case .long:
+				return (self as? LongValue) == (otherTag as? LongValue)
+			case .float:
+				return (self as? FloatValue) == (otherTag as? FloatValue)
+			case .double:
+				return (self as? DoubleValue) == (otherTag as? DoubleValue)
+			case .byteArray:
+				return (self as? ByteArray) == (otherTag as? ByteArray)
+			case .intArray:
+				return (self as? IntArray) == (otherTag as? IntArray)
+			case .longArray:
+				return (self as? LongArray) == (otherTag as? LongArray)
+			case .string:
+				return (self as? StringValue) == (otherTag as? StringValue)
+			case .list:
+				return (self as? GenericList) == (otherTag as? GenericList)
+			case .compound:
+				return (self as? Compound) == (otherTag as? Compound)
+		}
 	}
 	
 	public var description: String {
@@ -70,7 +69,7 @@ struct End: Tag {
 	}
 	
 	func description(indentation: UInt) -> String {
-		return makeIndent(indentation) + "[Tag:End]"
+		return "[end]"
 	}
 }
 
@@ -85,7 +84,7 @@ public struct GenericList: AnyList {
 	public let type = NBTTagType.list
 	
 	public var genericType: NBTTagType
-	public var elements: [Tag]
+	public var elements: [any Tag]
 	
 	public static func make(with stream: DataStream) -> GenericList {
 		guard let type = NBTTagType(rawValue: stream.read(Int8.self)) else {
@@ -95,11 +94,11 @@ public struct GenericList: AnyList {
 		
 		let length = stream.read(Int32.self)
 		
-		var elements = [Tag]()
+		var elements = [any Tag]()
 		elements.reserveCapacity(Int(length))
 		
 		for _ in 0..<length {
-			elements.append(readPayload(type: type, stream: stream))
+			elements.append(stream.readPayload(type: type))
 		}
 		
 		return GenericList(genericType: type, elements: elements)
@@ -114,8 +113,25 @@ public struct GenericList: AnyList {
 		}
 	}
 	
+	public static func ==(lhs: GenericList, rhs: GenericList) -> Bool {
+		guard lhs.genericType == rhs.genericType else {
+			return false
+		}
+
+		guard lhs.elements.count == rhs.elements.count else {
+			return false
+		}
+		
+		for (lel, rel) in zip(lhs.elements, rhs.elements) {
+			guard lel.equal(to: rel) else {
+				return false
+			}
+		}
+		return true
+	}
+	
 	public func description(indentation: UInt) -> String {
-		var result = "[List:"
+		var result = "[list:"
 		for tag in self.elements {
 			result += "\n\(makeIndent(indentation)) > \(tag.description(indentation: indentation + 1))"
 		}
@@ -127,6 +143,7 @@ public struct GenericList: AnyList {
 protocol SpecializedArray: AnyList {
 	associatedtype SType where SType: DataStreamReadable & DataAccumulatorWritable
 	
+	var elementType: NBTTagType { get }
 	var elements: [SType] { get set }
 	var nbtValues: [any SpecializedValue] { get }
 	
@@ -135,6 +152,7 @@ protocol SpecializedArray: AnyList {
 
 public struct ByteArray: SpecializedArray {
 	public let type = NBTTagType.byteArray
+	public let elementType = NBTTagType.byte
 	public var elements: [Int8]
 	public var nbtValues: [any SpecializedValue] {
 		return elements.map { ByteValue(value: $0) }
@@ -143,6 +161,7 @@ public struct ByteArray: SpecializedArray {
 
 public struct IntArray: SpecializedArray {
 	public let type = NBTTagType.intArray
+	public let elementType = NBTTagType.int
 	public var elements: [Int32]
 	public var nbtValues: [any SpecializedValue] {
 		return elements.map { IntValue(value: $0) }
@@ -151,6 +170,7 @@ public struct IntArray: SpecializedArray {
 
 public struct LongArray: SpecializedArray {
 	public let type = NBTTagType.longArray
+	public let elementType = NBTTagType.long
 	public var elements: [Int64]
 	public var nbtValues: [any SpecializedValue] {
 		return elements.map { LongValue(value: $0) }
@@ -177,9 +197,9 @@ extension SpecializedArray {
 	}
 	
 	public func description(indentation: UInt) -> String {
-		var result = "[List:"
+		var result = "[list:"
 		for value in self.elements {
-			result += "\n\(makeIndent(indentation)) > [\(type.description):\(value)]"
+			result += "\n\(makeIndent(indentation)) > [\(elementType.description):\(value)]"
 		}
 		result += "\n\(makeIndent(indentation))]"
 		return result
@@ -190,9 +210,16 @@ extension SpecializedArray {
 // MARK:- Compound
 
 public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
-	public struct Pair {
+	public struct Pair: Equatable {
 		public let key: String
-		public let value: Tag
+		public let value: any Tag
+		
+		public static func ==(lhs: Pair, rhs: Pair) -> Bool {
+			guard lhs.key == rhs.key else {
+				return false
+			}
+			return lhs.value.equal(to: rhs.value)
+		}
 	}
 	
 	public let type = NBTTagType.compound
@@ -207,7 +234,7 @@ public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
 		self.contents = contents
 	}
 	
-	public subscript(key: String) -> Tag? {
+	public subscript(key: String) -> (any Tag)? {
 		set {
 			self.contents.removeAll { $0.key == key }
 			if let newValue = newValue {
@@ -220,7 +247,7 @@ public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
 	}
 	
 	public static func make(with stream: DataStream) -> Compound {
-		var contents = [String: Tag]()
+		var contents = [String: any Tag]()
 		
 		// TODO: make this loop nicer
 		while true {
@@ -234,7 +261,7 @@ public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
 			}
 			
 			let name = stream.read(String.self)
-			let payload = readPayload(type: type, stream: stream)
+			let payload = stream.readPayload(type: type)
 			
 			if let _ = payload as? End {
 				break
@@ -261,7 +288,7 @@ public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
 	}
 	
 	public func description(indentation: UInt) -> String {
-		var result = "[Dict:"
+		var result = "[dict:"
 		for pair in self.contents {
 			result += "\n\(makeIndent(indentation)) > `\(pair.key)` -> \(pair.value.description(indentation: indentation + 2))"
 		}

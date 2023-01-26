@@ -26,11 +26,11 @@ public struct NBTStructure {
 		return acc.data
 	}
 
-	public func read(_ keypath: [String]) throws -> Tag? {
+	public func read(_ keypath: [String]) throws -> (any Tag)? {
 		return try traverse(keypath).1
 	}
 		
-	public mutating func write(_ value: Tag, to keypath: [String]) throws {
+	public mutating func write(_ value: any Tag, to keypath: [String]) throws {
 		//"", "Data", "DataPacks", "Enabled", "0"
 		var (tags, _) = try traverse(keypath)
 
@@ -38,7 +38,7 @@ public struct NBTStructure {
 		for key in keypath.reversed() {
 			let tag = tags.popLast()!
 			
-			var newValue: Tag
+			var newValue: any Tag
 			if var compound = tag as? Compound {
 				compound[key] = value
 				newValue = compound
@@ -90,13 +90,13 @@ public struct NBTStructure {
 		tag = compound
 	}
 		
-	private func traverse(_ keypath: [String]) throws -> ([Tag], Tag?) {
+	private func traverse(_ keypath: [String]) throws -> ([any Tag], (any Tag)?) {
 		if keypath.count == 0 {
 			return ([], tag)
 		}
 
-		var workingTag: Tag = self.tag
-		var accumulator: [Tag] = [workingTag]
+		var workingTag: any Tag = self.tag
+		var accumulator: [any Tag] = [workingTag]
 		for key in keypath.dropLast(1) {
 			if let compound = workingTag as? Compound {
 				if let found = compound[key] {

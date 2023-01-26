@@ -53,7 +53,7 @@ fileprivate struct NBTKeyedDecoding<Key: CodingKey>: KeyedDecodingContainerProto
 	let decoder: _NBTDecoder
 	var codingPath: [CodingKey]
 	
-	var tag: Tag? {
+	var tag: (any Tag)? {
 		let path = codingPath.map { $0.stringValue }
 		return try? decoder.storage().nbt.read(path)
 	}
@@ -168,7 +168,7 @@ fileprivate struct NBTUnkeyedDecoding: UnkeyedDecodingContainer {
 	var codingPath: [CodingKey]
 	var currentIndex: Int
 	
-	var tag: Tag? {
+	var tag: (any Tag)? {
 		let path = codingPath.map { $0.stringValue }
 		return try? decoder.storage().nbt.read(path)
 	}
