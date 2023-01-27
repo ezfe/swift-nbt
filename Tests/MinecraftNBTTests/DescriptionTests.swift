@@ -1,7 +1,7 @@
 import XCTest
 @testable import MinecraftNBT
 
-public class DescriptionTests: XCTestCase {
+final class DescriptionTests: XCTestCase {
 	func testByte() {
 		XCTAssertEqual(ByteValue(value: 43).description, "[byte:43]")
 		XCTAssertEqual(ByteValue(value: 43).description(indentation: 3), "[byte:43]")

@@ -21,7 +21,11 @@ extension Tag {
 		return String(repeating: " ", count: 3 * Int(quantity))
 	}
 	
-	public func equal(to otherTag: any Tag) -> Bool {
+	public func equal(to otherTag: (any Tag)?) -> Bool {
+		guard let otherTag else {
+			return false
+		}
+
 		guard self.type == otherTag.type else {
 			return false
 		}
@@ -73,140 +77,6 @@ struct End: Tag {
 	}
 }
 
-// MARK:- Lists
-
-public protocol AnyList: Tag, DataStreamReadable {
-	associatedtype Element
-	var elements: [Element] { get }
-}
-
-public struct GenericList: AnyList {
-	public let type = NBTTagType.list
-	
-	public var genericType: NBTTagType
-	public var elements: [any Tag]
-	
-	public static func make(with stream: DataStream) -> GenericList {
-		guard let type = NBTTagType(rawValue: stream.read(Int8.self)) else {
-			print("Failed to find type")
-			exit(4)
-		}
-		
-		let length = stream.read(Int32.self)
-		
-		var elements = [any Tag]()
-		elements.reserveCapacity(Int(length))
-		
-		for _ in 0..<length {
-			elements.append(stream.readPayload(type: type))
-		}
-		
-		return GenericList(genericType: type, elements: elements)
-	}
-	
-	public func append(to accumulator: DataAccumulator) {
-		self.genericType.rawValue.append(to: accumulator)
-		Int32(self.elements.count).append(to: accumulator)
-		
-		for tag in self.elements {
-			tag.append(to: accumulator)
-		}
-	}
-	
-	public static func ==(lhs: GenericList, rhs: GenericList) -> Bool {
-		guard lhs.genericType == rhs.genericType else {
-			return false
-		}
-
-		guard lhs.elements.count == rhs.elements.count else {
-			return false
-		}
-		
-		for (lel, rel) in zip(lhs.elements, rhs.elements) {
-			guard lel.equal(to: rel) else {
-				return false
-			}
-		}
-		return true
-	}
-	
-	public func description(indentation: UInt) -> String {
-		var result = "[list:"
-		for tag in self.elements {
-			result += "\n\(makeIndent(indentation)) > \(tag.description(indentation: indentation + 1))"
-		}
-		result += "\n\(makeIndent(indentation))]"
-		return result
-	}
-}
-
-protocol SpecializedArray: AnyList {
-	associatedtype SType where SType: DataStreamReadable & DataAccumulatorWritable
-	
-	var elementType: NBTTagType { get }
-	var elements: [SType] { get set }
-	var nbtValues: [any SpecializedValue] { get }
-	
-	init(elements: [SType])
-}
-
-public struct ByteArray: SpecializedArray {
-	public let type = NBTTagType.byteArray
-	public let elementType = NBTTagType.byte
-	public var elements: [Int8]
-	public var nbtValues: [any SpecializedValue] {
-		return elements.map { ByteValue(value: $0) }
-	}
-}
-
-public struct IntArray: SpecializedArray {
-	public let type = NBTTagType.intArray
-	public let elementType = NBTTagType.int
-	public var elements: [Int32]
-	public var nbtValues: [any SpecializedValue] {
-		return elements.map { IntValue(value: $0) }
-	}
-}
-
-public struct LongArray: SpecializedArray {
-	public let type = NBTTagType.longArray
-	public let elementType = NBTTagType.long
-	public var elements: [Int64]
-	public var nbtValues: [any SpecializedValue] {
-		return elements.map { LongValue(value: $0) }
-	}
-}
-
-extension SpecializedArray {
-	public static func make(with stream: DataStream) -> Self {
-		let length = stream.read(Int32.self)
-		
-		var storage = [SType]()
-		storage.reserveCapacity(Int(length))
-		
-		for _ in 0..<length {
-			storage.append(stream.read(SType.self))
-		}
-		
-		return .init(elements: storage)
-	}
-	
-	public func append(to accumulator: DataAccumulator) {
-		Int32(self.elements.count).append(to: accumulator)
-		self.elements.forEach { $0.append(to: accumulator) }
-	}
-	
-	public func description(indentation: UInt) -> String {
-		var result = "[list:"
-		for value in self.elements {
-			result += "\n\(makeIndent(indentation)) > [\(elementType.description):\(value)]"
-		}
-		result += "\n\(makeIndent(indentation))]"
-		return result
-	}
-
-}
-
 // MARK:- Compound
 
 public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
@@ -246,12 +116,13 @@ public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
 		}
 	}
 	
-	public static func make(with stream: DataStream) -> Compound {
+	public static func make(with stream: DataStream) -> Compound? {
 		var contents = [String: any Tag]()
 		
 		// TODO: make this loop nicer
 		while true {
-			guard let type = NBTTagType(rawValue: stream.read(Int8.self)) else {
+			guard let type = stream.read(Int8.self),
+					let type = NBTTagType(rawValue: type) else {
 				print("Failed to find type: ")
 				break
 			}
@@ -260,7 +131,9 @@ public struct Compound: Tag, DataStreamReadable, DataAccumulatorWritable {
 				break
 			}
 			
-			let name = stream.read(String.self)
+			guard let name = stream.read(String.self) else {
+				return nil
+			}
 			let payload = stream.readPayload(type: type)
 			
 			if let _ = payload as? End {
@@ -456,4 +329,12 @@ extension LongValue: Int64Resizable {
 extension LongValue: UInt32Resizable, UInt64Resizable {
 	public var uint32: UInt32 { UInt32(value) }
 	public var uint64: UInt64 { UInt64(value) }
+}
+
+public func equal(_ lhs: (any Tag)?, _ rhs: (any Tag)?) -> Bool {
+	if let lhs, let rhs {
+		return lhs.equal(to: rhs)
+	} else {
+		return lhs == nil && rhs == nil
+	}
 }

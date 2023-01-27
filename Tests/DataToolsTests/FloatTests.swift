@@ -10,7 +10,7 @@ final class FloatTests: XCTestCase {
 	}
 	
 	func testFloat32Deserialization() {
-		let stream = DataStream(Data([0x3F, 0x80, 0x00, 0x00]))
+		let stream = DataStream([0x3F, 0x80, 0x00, 0x00])
 		let read = Float32.make(with: stream)
 		XCTAssertEqual(1, read)
 	}
@@ -22,7 +22,7 @@ final class FloatTests: XCTestCase {
 	}
 	
 	func testFloat64Deserialization() {
-		let stream = DataStream(Data([0x3F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]))
+		let stream = DataStream([0x3F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
 		let read = Float64.make(with: stream)
 		XCTAssertEqual(1, read)
 	}

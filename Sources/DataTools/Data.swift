@@ -20,7 +20,7 @@ public class DataAccumulator {
 }
 
 public protocol DataStreamReadable {
-	static func make(with stream: DataStream) -> Self
+	static func make(with stream: DataStream) -> Self?
 }
 
 public protocol DataAccumulatorWritable {

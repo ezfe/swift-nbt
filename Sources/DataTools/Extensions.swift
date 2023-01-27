@@ -9,7 +9,7 @@ import Foundation
 
 
 extension UInt8: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> UInt8 {
+	public static func make(with stream: DataStream) -> UInt8? {
 		return stream.next()
 	}
 	
@@ -19,9 +19,10 @@ extension UInt8: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension UInt16: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> UInt16 {
-		let most = stream.next()
-		let least = stream.next()
+	public static func make(with stream: DataStream) -> UInt16? {
+		guard let most = stream.next(), let least = stream.next() else {
+			return nil
+		}
 		return (UInt16(most) << 8) + UInt16(least)
 	}
 	
@@ -33,11 +34,13 @@ extension UInt16: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension UInt32: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> UInt32 {
-		let a = stream.next()
-		let b = stream.next()
-		let c = stream.next()
-		let d = stream.next()
+	public static func make(with stream: DataStream) -> UInt32? {
+		guard let a = stream.next(),
+				let b = stream.next(),
+				let c = stream.next(),
+				let d = stream.next() else {
+			return nil
+		}
 		
 		let arr = [a, b, c, d]
 		let data = Data(arr)
@@ -53,15 +56,17 @@ extension UInt32: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension UInt64: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> UInt64 {
-		let a = stream.next()
-		let b = stream.next()
-		let c = stream.next()
-		let d = stream.next()
-		let e = stream.next()
-		let f = stream.next()
-		let g = stream.next()
-		let h = stream.next()
+	public static func make(with stream: DataStream) -> UInt64? {
+		guard let a = stream.next(),
+				let b = stream.next(),
+				let c = stream.next(),
+				let d = stream.next(),
+				let e = stream.next(),
+				let f = stream.next(),
+				let g = stream.next(),
+				let h = stream.next() else {
+			return nil
+		}
 		
 		let arr = [a, b, c, d, e, f, g, h]
 		let data = Data(arr)
@@ -76,8 +81,10 @@ extension UInt64: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension Int8: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> Int8 {
-		let bits = stream.read(UInt8.self)
+	public static func make(with stream: DataStream) -> Int8? {
+		guard let bits = stream.read(UInt8.self) else {
+			return nil
+		}
 		return Int8(bitPattern: bits)
 	}
 	
@@ -89,8 +96,10 @@ extension Int8: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension Int16: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> Int16 {
-		let bits = stream.read(UInt16.self)
+	public static func make(with stream: DataStream) -> Int16? {
+		guard let bits = stream.read(UInt16.self) else {
+			return nil
+		}
 		return Int16(bitPattern: bits)
 	}
 	
@@ -102,8 +111,10 @@ extension Int16: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension Int32: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> Int32 {
-		let bits = stream.read(UInt32.self)
+	public static func make(with stream: DataStream) -> Int32? {
+		guard let bits = stream.read(UInt32.self) else {
+			return nil
+		}
 		return Int32(bitPattern: bits)
 	}
 	
@@ -115,8 +126,10 @@ extension Int32: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension Int64: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> Int64 {
-		let bits = stream.read(UInt64.self)
+	public static func make(with stream: DataStream) -> Int64? {
+		guard let bits = stream.read(UInt64.self) else {
+			return nil
+		}
 		return Int64(bitPattern: bits)
 	}
 	
@@ -128,8 +141,10 @@ extension Int64: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension Float32: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> Float32 {
-		let bits = stream.read(UInt32.self)
+	public static func make(with stream: DataStream) -> Float32? {
+		guard let bits = stream.read(UInt32.self) else {
+			return nil
+		}
 		return Float32(bitPattern: bits)
 	}
 	
@@ -142,8 +157,10 @@ extension Float32: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension Float64: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> Float64 {
-		let bits = stream.read(UInt64.self)
+	public static func make(with stream: DataStream) -> Float64? {
+		guard let bits = stream.read(UInt64.self) else {
+			return nil
+		}
 		return Float64(bitPattern: bits)
 	}
 	
@@ -156,12 +173,17 @@ extension Float64: DataStreamReadable, DataAccumulatorWritable {
 }
 
 extension String: DataStreamReadable, DataAccumulatorWritable {
-	public static func make(with stream: DataStream) -> String {
-		let length = stream.read(UInt16.self)
+	public static func make(with stream: DataStream) -> String? {
+		guard let length = stream.read(UInt16.self) else {
+			return nil
+		}
 		
 		var accumulate = [UInt8]()
 		for _ in 0..<length {
-			accumulate.append(stream.read(UInt8.self))
+			guard let byte = stream.read(UInt8.self) else {
+				return nil
+			}
+			accumulate.append(byte)
 		}
 		
 		let data = Data(accumulate)

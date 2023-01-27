@@ -8,23 +8,44 @@
 import DataTools
 
 extension DataStream {
-	internal func readPayload(type: NBTTagType) -> any Tag {
+	internal func readPayload(type: NBTTagType) -> (any Tag)? {
 		switch type {
 			case .byte:
-				return ByteValue(value: self.read(Int8.self))
+				guard let value = self.read(Int8.self) else {
+					return nil
+				}
+				return ByteValue(value: value)
 			case .short:
-				return ShortValue(value: self.read(Int16.self))
+				guard let value = self.read(Int16.self) else {
+					return nil
+				}
+				return ShortValue(value: value)
 			case .int:
-				return IntValue(value: self.read(Int32.self))
+				guard let value = self.read(Int32.self) else {
+					return nil
+				}
+				return IntValue(value: value)
 			case .long:
-				return LongValue(value: self.read(Int64.self))
+				guard let value = self.read(Int64.self) else {
+					return nil
+				}
+				return LongValue(value: value)
 			case .float:
-				return FloatValue(value: self.read(Float32.self))
+				guard let value = self.read(Float32.self) else {
+					return nil
+				}
+				return FloatValue(value: value)
 			case .double:
-				return DoubleValue(value: self.read(Float64.self))
+				guard let value = self.read(Float64.self) else {
+					return nil
+				}
+				return DoubleValue(value: value)
 				
 			case .string:
-				return StringValue(value: self.read(String.self))
+				guard let value = self.read(String.self) else {
+					return nil
+				}
+				return StringValue(value: value)
 				
 			case .list:
 				return GenericList.make(with: self)

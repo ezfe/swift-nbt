@@ -6,7 +6,10 @@ import NBTStructures
 let url = URL(fileURLWithPath: "/Users/ezekielelin/Library/Application Support/minecraft/saves/New World/level copy")
 let data = try Data(contentsOf: url)
 
-var structure = NBTStructure(decompressed: data)
+guard var structure = NBTStructure(decompressed: data) else {
+	print("Failed to read data")
+	exit(0)
+}
 print(structure.tag.description)
 
 let decoder = NBTDecoder()
