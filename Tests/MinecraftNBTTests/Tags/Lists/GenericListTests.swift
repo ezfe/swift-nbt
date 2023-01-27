@@ -121,7 +121,7 @@ final class GenericListTests: XCTestCase {
 	}
 	
 	func testEqualityUnequalLists() {
-		XCTAssertEqual(GenericList(genericType: .int, elements: [IntValue(value: 4), IntValue(value: 32)]),
+		XCTAssertNotEqual(GenericList(genericType: .int, elements: [IntValue(value: 4), IntValue(value: 32)]),
 							GenericList(genericType: .int, elements: [IntValue(value: 8), IntValue(value: 12)]))
 	}
 
