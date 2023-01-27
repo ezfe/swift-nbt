@@ -3,10 +3,7 @@
 import PackageDescription
 
 let package = Package(
-	name: "MinecraftTools",
-	platforms: [
-		.macOS(.v13)
-	],
+	name: "swift-nbt",
 	products: [
 		.library(name: "MinecraftNBT", targets: ["MinecraftNBT"]),
 	],
