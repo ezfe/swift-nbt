@@ -12,8 +12,10 @@ guard var structure = NBTStructure(decompressed: data) else {
 }
 print(structure.tag.description)
 
-let decoder = NBTDecoder()
-let decoded = try decoder.decode(LevelDat.self, from: structure)
-print(decoded)
+print(try structure.read(["", "Data", "ServerBrands", "0"]))
+
+//let decoder = NBTDecoder()
+//let decoded = try decoder.decode(LevelDat.self, from: structure)
+//print(decoded)
 
 //try structure.data.write(to: URL(fileURLWithPath: "/Users/ezekielelin/Library/Application Support/minecraft/saves/New World/level copy_new"))
