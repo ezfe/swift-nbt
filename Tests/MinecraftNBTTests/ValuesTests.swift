@@ -6,19 +6,18 @@ final class ValuesTests: XCTestCase {
 	func testAppendToAccumulator() {
 		let accumulator = DataAccumulator()
 		
-		ByteValue(value: 0x3F).append(to: accumulator)
-		ShortValue(value: 0x4629).append(to: accumulator)
-		IntValue(value: 0x0C771D5E).append(to: accumulator)
-		LongValue(value: 0x07274DAAD884B926).append(to: accumulator)
-		FloatValue(value: 9012384.0).append(to: accumulator)
-		DoubleValue(value: 80912894123122320).append(to: accumulator)
-		StringValue(value: "Hello").append(to: accumulator)
-		GenericList(genericType: .float, elements: []).append(to: accumulator)
-		ByteArray(elements: []).append(to: accumulator)
-		IntArray(elements: []).append(to: accumulator)
-		LongArray(elements: []).append(to: accumulator)
-		Compound(contents: []).append(to: accumulator)
-		End().append(to: accumulator)
+		NBTByte(0x3F).append(to: accumulator)
+		NBTShort(0x4629).append(to: accumulator)
+		NBTInt(0x0C771D5E).append(to: accumulator)
+		NBTLong(0x07274DAAD884B926).append(to: accumulator)
+		NBTFloat(9012384.0).append(to: accumulator)
+		NBTDouble(80912894123122320).append(to: accumulator)
+		NBTString("Hello").append(to: accumulator)
+		NBTList(genericType: .float, elements: []).append(to: accumulator)
+		NBTList(bytes: []).append(to: accumulator)
+		NBTList(ints: []).append(to: accumulator)
+		NBTList(longs: []).append(to: accumulator)
+		NBTCompound(contents: [:]).append(to: accumulator)
 
 		let bytes: [UInt8] = [
 			0x3F,                                           // byte
@@ -33,27 +32,25 @@ final class ValuesTests: XCTestCase {
 			0x00, 0x00, 0x00, 0x00,                         // empty generic list of ints
 			0x00, 0x00, 0x00, 0x00,                         // empty generic list of longs
 			0x00,                                           // empty compound
-			0x00,                                           // end tag
 		]
 		XCTAssertEqual(accumulator.data, Data(bytes))
 	}
 	
 	func testBasicEquality() {
-		let byte = ByteValue(value: 0x3F)
-		let short = ShortValue(value: 0x4629)
-		let int = IntValue(value: 0x0C771D5E)
-		let long = LongValue(value: 0x07274DAAD884B926)
-		let float = FloatValue(value: 9012384.0)
-		let double = DoubleValue(value: 80912894123122320)
-		let string = StringValue(value: "Hello")
-		let list = GenericList(genericType: .float, elements: [FloatValue(value: 9012384.0), FloatValue(value: 12842.12)])
-		let byteArray = ByteArray(elements: [0x12, 0x34, 0x12])
-		let intArray = IntArray(elements: [0x153, 0x34223, 0x121])
-		let longArray = LongArray(elements: [0x15341344, 0x34223425, 0x121234])
-		let compound = Compound(contents: [.init(key: "Hello", value: StringValue(value: "World!"))])
-		let end = End()
+		let byte = NBTByte(0x3F)
+		let short = NBTShort(0x4629)
+		let int = NBTInt(0x0C771D5E)
+		let long = NBTLong(0x07274DAAD884B926)
+		let float = NBTFloat(9012384.0)
+		let double = NBTDouble(80912894123122320)
+		let string = NBTString("Hello")
+		let list = NBTList(genericType: .float, elements: [NBTFloat(9012384.0), NBTFloat(12842.12)])
+		let byteList = NBTList(bytes: [0x12, 0x34, 0x12])
+		let intList = NBTList(ints: [0x153, 0x34223, 0x121])
+		let longList = NBTList(longs: [0x15341344, 0x34223425, 0x121234])
+		let compound = NBTCompound(contents: ["Hello": "World!"])
 		
-		let elements: [any Tag] = [byte, short, int, long, float, double, string, list, byteArray, intArray, longArray, compound, end]
+		let elements: [any Tag] = [byte, short, int, long, float, double, string, list, byteList, intList, longList, compound]
 		for (i, l) in elements.enumerated() {
 			for (j, r) in elements.enumerated() {
 				if i == j {
@@ -68,41 +65,41 @@ final class ValuesTests: XCTestCase {
 	}
 	
 	func testValueInequality() {
-		XCTAssertFalse(ByteValue(value: 5).equal(to: ByteValue(value: 84)))
-		XCTAssertFalse(ShortValue(value: 230).equal(to: ShortValue(value: 182)))
-		XCTAssertFalse(IntValue(value: 29301).equal(to: IntValue(value: 4203)))
-		XCTAssertFalse(LongValue(value: 2939184920).equal(to: LongValue(value: 928059182)))
-		XCTAssertFalse(FloatValue(value: 923.324).equal(to: FloatValue(value: 1920.432)))
-		XCTAssertFalse(DoubleValue(value: 93102894.23).equal(to: DoubleValue(value: 129.212)))
-		XCTAssertFalse(StringValue(value: "Hello").equal(to: StringValue(value: "World")))
+		XCTAssertFalse(NBTByte(5).equal(to: NBTByte(84)))
+		XCTAssertFalse(NBTShort(230).equal(to: NBTShort(182)))
+		XCTAssertFalse(NBTInt(29301).equal(to: NBTInt(4203)))
+		XCTAssertFalse(NBTLong(2939184920).equal(to: NBTLong(928059182)))
+		XCTAssertFalse(NBTFloat(923.324).equal(to: NBTFloat(1920.432)))
+		XCTAssertFalse(NBTDouble(93102894.23).equal(to: NBTDouble(129.212)))
+		XCTAssertFalse(NBTString("Hello").equal(to: NBTString("World")))
 
-		XCTAssertFalse(GenericList(genericType: .float, elements: [FloatValue(value: 9012384.0), FloatValue(value: 12842.12)])
-			.equal(to: GenericList(genericType: .float, elements: [FloatValue(value: 12842.12), FloatValue(value: 9012384.0)])))
-		XCTAssertFalse(GenericList(genericType: .float, elements: [FloatValue(value: 9012384.0), FloatValue(value: 12842.12)])
-			.equal(to: GenericList(genericType: .float, elements: [FloatValue(value: 9012384.0)])))
-		XCTAssertFalse(GenericList(genericType: .float, elements: [FloatValue(value: 9012384.0), FloatValue(value: 12842.12)])
-			.equal(to: GenericList(genericType: .float, elements: [])))
+		XCTAssertFalse(NBTList(genericType: .float, elements: [NBTFloat(9012384.0), NBTFloat(12842.12)])
+			.equal(to: NBTList(genericType: .float, elements: [NBTFloat(12842.12), NBTFloat(9012384.0)])))
+		XCTAssertFalse(NBTList(genericType: .float, elements: [NBTFloat(9012384.0), NBTFloat(12842.12)])
+			.equal(to: NBTList(genericType: .float, elements: [NBTFloat(9012384.0)])))
+		XCTAssertFalse(NBTList(genericType: .float, elements: [NBTFloat(9012384.0), NBTFloat(12842.12)])
+			.equal(to: NBTList(genericType: .float, elements: [])))
 		
-		XCTAssertFalse(ByteArray(elements: [0x15, 0x34, 0x12]).equal(to: ByteArray(elements: [0x12, 0x32, 0x51])))
-		XCTAssertFalse(ByteArray(elements: [0x15, 0x34, 0x12]).equal(to: ByteArray(elements: [0x15])))
-		XCTAssertFalse(ByteArray(elements: [0x15, 0x34, 0x12]).equal(to: ByteArray(elements: [])))
+		XCTAssertFalse(NBTList(bytes: [0x15, 0x34, 0x12]).equal(to: NBTList(bytes: [0x12, 0x32, 0x51])))
+		XCTAssertFalse(NBTList(bytes: [0x15, 0x34, 0x12]).equal(to: NBTList(bytes: [0x15])))
+		XCTAssertFalse(NBTList(bytes: [0x15, 0x34, 0x12]).equal(to: NBTList(bytes: [])))
 		
-		XCTAssertFalse(IntArray(elements: [0x153, 0x34223, 0x121]).equal(to: IntArray(elements: [0x152, 0x12112, 0x342])))
-		XCTAssertFalse(IntArray(elements: [0x155, 0x34423, 0x123]).equal(to: IntArray(elements: [0x155])))
-		XCTAssertFalse(IntArray(elements: [0x151, 0x34323, 0x124]).equal(to: IntArray(elements: [])))
+		XCTAssertFalse(NBTList(ints: [0x153, 0x34223, 0x121]).equal(to: NBTList(ints: [0x152, 0x12112, 0x342])))
+		XCTAssertFalse(NBTList(ints: [0x155, 0x34423, 0x123]).equal(to: NBTList(ints: [0x155])))
+		XCTAssertFalse(NBTList(ints: [0x151, 0x34323, 0x124]).equal(to: NBTList(ints: [])))
 		
-		XCTAssertFalse(LongArray(elements: [0x15341344, 0x34223425, 0x121234]).equal(to: LongArray(elements: [0x152134134, 0x121234232, 0x3424674])))
-		XCTAssertFalse(LongArray(elements: [0x1551343, 0x34413413, 0x1231345]).equal(to: LongArray(elements: [0x34413413])))
-		XCTAssertFalse(LongArray(elements: [0x15132, 0x3434567, 0x1244567]).equal(to: LongArray(elements: [])))
+		XCTAssertFalse(NBTList(longs: [0x15341344, 0x34223425, 0x121234]).equal(to: NBTList(longs: [0x152134134, 0x121234232, 0x3424674])))
+		XCTAssertFalse(NBTList(longs: [0x1551343, 0x34413413, 0x1231345]).equal(to: NBTList(longs: [0x34413413])))
+		XCTAssertFalse(NBTList(longs: [0x15132, 0x3434567, 0x1244567]).equal(to: NBTList(longs: [])))
 		
-		XCTAssertFalse(Compound(contents: [.init(key: "Hello", value: StringValue(value: "World!"))])
-			.equal(to: Compound(contents: [.init(key: "Hello", value: StringValue(value: "World?"))])))
-		XCTAssertFalse(Compound(contents: [.init(key: "Hello", value: StringValue(value: "World!"))])
-			.equal(to: Compound(contents: [.init(key: "HelloNot", value: StringValue(value: "World!"))])))
-		XCTAssertFalse(Compound(contents: [.init(key: "Hello", value: StringValue(value: "World!"))])
-			.equal(to: Compound(contents: [.init(key: "Hello", value: StringValue(value: "World!")), .init(key: "There", value: FloatValue(value: 43.1234))])))
-		XCTAssertFalse(Compound(contents: [.init(key: "Hello", value: StringValue(value: "World!"))])
-			.equal(to: Compound(contents: [])))
+		XCTAssertFalse(NBTCompound(contents: ["Hello": "World!"])
+			.equal(to: NBTCompound(contents: ["Hello": "World?"])))
+		XCTAssertFalse(NBTCompound(contents: ["Hello": "World!"])
+			.equal(to: NBTCompound(contents: ["HelloNot": "World!"])))
+		XCTAssertFalse(NBTCompound(contents: ["Hello": "World!"])
+			.equal(to: NBTCompound(contents: ["Hello": "World!", "There": NBTFloat(43.1234)])))
+		XCTAssertFalse(NBTCompound(contents: ["Hello": "World!"])
+			.equal(to: NBTCompound(contents: [:])))
 		
 		// End tag cannot be unequal to itself
 	}

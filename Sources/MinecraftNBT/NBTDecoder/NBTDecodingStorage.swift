@@ -23,8 +23,8 @@ class _NBTDecodingStorage {
 	func decode(_ type: Bool.Type, forKey key: [CodingKey]) throws -> Bool {
 		let key = key.map { $0.stringValue }
 		let tag = try nbt.read(key)
-		if let tag = tag as? ByteValue {
-			return tag.value == 1
+		if let tag = tag as? NBTByte {
+			return tag == 1
 		} else if let tag {
 			throw DecodingError.incorrectType("Expected `boolean`, found `\(tag)` at `\(key)`")
 		} else {
@@ -35,8 +35,8 @@ class _NBTDecodingStorage {
 	func decode(_ type: String.Type, forKey key: [CodingKey]) throws -> String {
 		let key = key.map { $0.stringValue }
 		let tag = try nbt.read(key)
-		if let tag = tag as? StringValue {
-			return tag.value
+		if let tag = tag as? NBTString {
+			return tag
 		} else if let tag {
 			throw DecodingError.incorrectType("Expected `string`, found `\(tag)` at `\(key)`")
 		} else {
@@ -47,8 +47,8 @@ class _NBTDecodingStorage {
 	func decode(_ type: Double.Type, forKey key: [CodingKey]) throws -> Double {
 		let key = key.map { $0.stringValue }
 		let tag = try nbt.read(key)
-		if let tag = tag as? DoubleValue {
-			return tag.value
+		if let tag = tag as? NBTDouble {
+			return tag
 		} else if let tag {
 			throw DecodingError.incorrectType("Expected `double`, found `\(tag)` at `\(key)`")
 		} else {
@@ -59,8 +59,8 @@ class _NBTDecodingStorage {
 	func decode(_ type: Float.Type, forKey key: [CodingKey]) throws -> Float {
 		let key = key.map { $0.stringValue }
 		let tag = try nbt.read(key)
-		if let tag = tag as? FloatValue {
-			return tag.value
+		if let tag = tag as? NBTFloat {
+			return tag
 		} else if let tag {
 			throw DecodingError.incorrectType("Expected `float`, found `\(tag)` at `\(key)`")
 		} else {

@@ -58,7 +58,7 @@ fileprivate struct NBTKeyedDecoding<Key: CodingKey>: KeyedDecodingContainerProto
 		return try? decoder.storage().nbt.read(path)
 	}
 	var allKeys: [Key] {
-		if let compound = tag as? Compound {
+		if let compound = tag as? NBTCompound {
 			return compound.contents.compactMap { Key(stringValue: $0.key) }
 		} else {
 			return []
@@ -173,7 +173,7 @@ fileprivate struct NBTUnkeyedDecoding: UnkeyedDecodingContainer {
 		return try? decoder.storage().nbt.read(path)
 	}
 	var count: Int? {
-		if let list = tag as? any AnyList {
+		if let list = tag as? NBTList {
 			return list.elements.count
 		} else {
 			return nil

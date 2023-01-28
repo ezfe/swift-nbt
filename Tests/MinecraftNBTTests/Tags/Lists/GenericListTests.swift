@@ -5,7 +5,7 @@ import DataTools
 final class GenericListTests: XCTestCase {
 	func testMakeWithBlankStream() {
 		let dataStream = DataStream([])
-		XCTAssertNil(GenericList.make(with: dataStream))
+		XCTAssertNil(NBTList.makeGenericList(with: dataStream))
 	}
 	
 	func testMakeWithInvalidType() {
@@ -13,7 +13,7 @@ final class GenericListTests: XCTestCase {
 			0xFF, // type: invalid
 		]
 		let stream = DataStream(bytes)
-		XCTAssertNil(GenericList.make(with: stream))
+		XCTAssertNil(NBTList.makeGenericList(with: stream))
 	}
 	
 	func testMakeWithTypeOnly() {
@@ -21,7 +21,7 @@ final class GenericListTests: XCTestCase {
 			0x06, // type: double
 		]
 		let stream = DataStream(bytes)
-		XCTAssertNil(GenericList.make(with: stream))
+		XCTAssertNil(NBTList.makeGenericList(with: stream))
 	}
 	
 	func testMakeWithLengthMismatch() {
@@ -30,7 +30,7 @@ final class GenericListTests: XCTestCase {
 			0x00, 0x00, 0x00, 0x05, // 5 items
 		]
 		let stream = DataStream(bytes)
-		XCTAssertNil(GenericList.make(with: stream))
+		XCTAssertNil(NBTList.makeGenericList(with: stream))
 	}
 	
 	func testMakeEmptyList() {
@@ -40,8 +40,8 @@ final class GenericListTests: XCTestCase {
 		]
 		let stream = DataStream(bytes)
 		
-		let actual = GenericList.make(with: stream)
-		let expected = GenericList(genericType: .double, elements: [])
+		let actual = NBTList.makeGenericList(with: stream)
+		let expected = NBTList(genericType: .double, elements: [])
 		
 		XCTAssertTrue(equal(expected, actual))
 	}
@@ -56,11 +56,11 @@ final class GenericListTests: XCTestCase {
 		]
 		let stream = DataStream(bytes)
 		
-		let actual = GenericList.make(with: stream)
-		let expected = GenericList(genericType: .short, elements: [
-			ShortValue(value: 0x0142),
-			ShortValue(value: 0x00AF),
-			ShortValue(value: 0x1938),
+		let actual = NBTList.makeGenericList(with: stream)
+		let expected = NBTList(genericType: .short, elements: [
+			NBTShort(0x0142),
+			NBTShort(0x00AF),
+			NBTShort(0x1938),
 		])
 		
 		XCTAssertTrue(equal(expected, actual))
@@ -82,29 +82,27 @@ final class GenericListTests: XCTestCase {
 		]
 		let stream = DataStream(bytes)
 		
-		let actual = GenericList.make(with: stream)
+		let actual = NBTList.makeGenericList(with: stream)
 		
-		let expected = GenericList(genericType: .list, elements: [
-			GenericList(genericType: .short, elements: []),
-			GenericList(genericType: .byte, elements: [ByteValue(value: 0x01),
-																	 ByteValue(value: 0x00),
-																	 ByteValue(value: 0x19)])
+		let expected = NBTList(genericType: .list, elements: [
+			NBTList(genericType: .short, elements: []),
+			NBTList(genericType: .byte, elements: [NBTByte(0x01), NBTByte(0x00), NBTByte(0x19)])
 		])
 		XCTAssertTrue(equal(expected, actual))
 	}
 	
 	func testAppendEmptyList() {
 		let accumulator = DataAccumulator()
-		GenericList(genericType: .int, elements: []).append(to: accumulator)
+		NBTList(genericType: .int, elements: []).append(to: accumulator)
 		
 		XCTAssertEqual(accumulator.data, Data([0x03, 0x00, 0x00, 0x00, 0x00]))
 	}
 	
 	func testAppendSimpleList() {
 		let accumulator = DataAccumulator()
-		GenericList(genericType: .short, elements: [ShortValue(value: 17961),
-																  ShortValue(value: -34),
-																  ShortValue(value: 8)]).append(to: accumulator)
+		NBTList(genericType: .short, elements: [NBTShort(17961),
+															 NBTShort(-34),
+															 NBTShort(8)]).append(to: accumulator)
 		
 		XCTAssertEqual(accumulator.data, Data([
 			0x02, //type: short
@@ -116,22 +114,22 @@ final class GenericListTests: XCTestCase {
 	}
 	
 	func testEqualityEqualLists() {
-		XCTAssertEqual(GenericList(genericType: .int, elements: [IntValue(value: 4), IntValue(value: 32)]),
-							GenericList(genericType: .int, elements: [IntValue(value: 4), IntValue(value: 32)]))
+		XCTAssertEqual(NBTList(genericType: .int, elements: [NBTInt(4), NBTInt(32)]),
+							NBTList(genericType: .int, elements: [NBTInt(4), NBTInt(32)]))
 	}
 	
 	func testEqualityUnequalLists() {
-		XCTAssertNotEqual(GenericList(genericType: .int, elements: [IntValue(value: 4), IntValue(value: 32)]),
-							GenericList(genericType: .int, elements: [IntValue(value: 8), IntValue(value: 12)]))
+		XCTAssertNotEqual(NBTList(genericType: .int, elements: [NBTInt(4), NBTInt(32)]),
+								NBTList(genericType: .int, elements: [NBTInt(8), NBTInt(12)]))
 	}
 
 	func testEqualityDifferentTypes() {
-		XCTAssertNotEqual(GenericList(genericType: .int, elements: [IntValue(value: 4), IntValue(value: 32)]),
-								GenericList(genericType: .long, elements: [LongValue(value: 4), LongValue(value: 32)]))
+		XCTAssertNotEqual(NBTList(genericType: .int, elements: [NBTInt(4), NBTInt(32)]),
+								NBTList(genericType: .long, elements: [NBTLong(4), NBTLong(32)]))
 	}
 	
 	func testEqualityDifferentLengths() {
-		XCTAssertNotEqual(GenericList(genericType: .int, elements: [IntValue(value: 4), IntValue(value: 32)]),
-								GenericList(genericType: .int, elements: [IntValue(value: 4)]))
+		XCTAssertNotEqual(NBTList(genericType: .int, elements: [NBTInt(4), NBTInt(32)]),
+								NBTList(genericType: .int, elements: [NBTInt(4)]))
 	}
 }

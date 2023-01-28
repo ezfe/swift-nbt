@@ -16,9 +16,9 @@ public enum NBTTagType: Int8, CustomStringConvertible {
 	case long = 4
 	case float = 5
 	case double = 6
-	case byteArray = 7
-	case intArray = 11
-	case longArray = 12
+	case byteList = 7
+	case intList = 11
+	case longList = 12
 	case string = 8
 	case list = 9
 	case compound = 10
@@ -26,7 +26,7 @@ public enum NBTTagType: Int8, CustomStringConvertible {
 	public var description: String {
 		switch self {
 			case .end:
-				return "end"
+				return "[end]"
 			case .byte:
 				return "byte"
 			case .short:
@@ -39,11 +39,11 @@ public enum NBTTagType: Int8, CustomStringConvertible {
 				return "float"
 			case .double:
 				return "double"
-			case .byteArray:
+			case .byteList:
 				return "[byte]"
-			case .intArray:
+			case .intList:
 				return "[int]"
-			case .longArray:
+			case .longList:
 				return "[long]"
 			case .string:
 				return "text"

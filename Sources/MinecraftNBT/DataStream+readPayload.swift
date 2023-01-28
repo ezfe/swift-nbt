@@ -10,58 +10,36 @@ import DataTools
 extension DataStream {
 	internal func readPayload(type: NBTTagType) -> (any Tag)? {
 		switch type {
+			case .end:
+				fatalError("Attempted to read tag type `end`, which is not allowed")
 			case .byte:
-				guard let value = self.read(Int8.self) else {
-					return nil
-				}
-				return ByteValue(value: value)
+				return self.read(Int8.self)
 			case .short:
-				guard let value = self.read(Int16.self) else {
-					return nil
-				}
-				return ShortValue(value: value)
+				return self.read(Int16.self)
 			case .int:
-				guard let value = self.read(Int32.self) else {
-					return nil
-				}
-				return IntValue(value: value)
+				return self.read(Int32.self)
 			case .long:
-				guard let value = self.read(Int64.self) else {
-					return nil
-				}
-				return LongValue(value: value)
+				return self.read(Int64.self)
 			case .float:
-				guard let value = self.read(Float32.self) else {
-					return nil
-				}
-				return FloatValue(value: value)
+				return self.read(Float32.self)
 			case .double:
-				guard let value = self.read(Float64.self) else {
-					return nil
-				}
-				return DoubleValue(value: value)
+				return self.read(Float64.self)
 				
 			case .string:
-				guard let value = self.read(String.self) else {
-					return nil
-				}
-				return StringValue(value: value)
+				return self.read(String.self)
 				
 			case .list:
-				return GenericList.make(with: self)
+				return NBTList.makeGenericList(with: self)
 				
-			case .byteArray:
-				return ByteArray.make(with: self)
-			case .intArray:
-				return IntArray.make(with: self)
-			case .longArray:
-				return LongArray.make(with: self)
+			case .byteList:
+				return NBTList.makeByteList(with: self)
+			case .intList:
+				return NBTList.makeIntList(with: self)
+			case .longList:
+				return NBTList.makeLongList(with: self)
 				
 			case .compound:
-				return Compound.make(with: self)
-				
-			case .end:
-				return End()
+				return NBTCompound.make(with: self)
 		}
 	}
 

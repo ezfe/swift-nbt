@@ -17,22 +17,20 @@ final class DataStreamTests: XCTestCase {
 			0x00, 0x00, 0x00, 0x00,                         // empty generic list of ints
 			0x00, 0x00, 0x00, 0x00,                         // empty generic list of longs
 			0x00,                                           // empty compound
-			0x00,                                           // end tag
 		]
 		let stream = DataStream(bytes)
 	
-		XCTAssertTrue(equal(stream.readPayload(type: .byte), ByteValue(value: 0x3F)))
-		XCTAssertTrue(equal(stream.readPayload(type: .short), ShortValue(value: 0x4629)))
-		XCTAssertTrue(equal(stream.readPayload(type: .int), IntValue(value: 0x0C771D5E)))
-		XCTAssertTrue(equal(stream.readPayload(type: .long), LongValue(value: 0x07274DAAD884B926)))
-		XCTAssertTrue(equal(stream.readPayload(type: .float), FloatValue(value: 9012384.0)))
-		XCTAssertTrue(equal(stream.readPayload(type: .double), DoubleValue(value: 80912894123122320)))
-		XCTAssertTrue(equal(stream.readPayload(type: .string), StringValue(value: "Hello")))
-		XCTAssertTrue(equal(stream.readPayload(type: .list), GenericList(genericType: .float, elements: [])))
-		XCTAssertTrue(equal(stream.readPayload(type: .byteArray), ByteArray(elements: [])))
-		XCTAssertTrue(equal(stream.readPayload(type: .intArray), IntArray(elements: [])))
-		XCTAssertTrue(equal(stream.readPayload(type: .longArray), LongArray(elements: [])))
-		XCTAssertTrue(equal(stream.readPayload(type: .compound), Compound(contents: [])))
-		XCTAssertTrue(equal(stream.readPayload(type: .end), End()))
+		XCTAssertTrue(equal(stream.readPayload(type: .byte), NBTByte(0x3F)))
+		XCTAssertTrue(equal(stream.readPayload(type: .short), NBTShort(0x4629)))
+		XCTAssertTrue(equal(stream.readPayload(type: .int), NBTInt(0x0C771D5E)))
+		XCTAssertTrue(equal(stream.readPayload(type: .long), NBTLong(0x07274DAAD884B926)))
+		XCTAssertTrue(equal(stream.readPayload(type: .float), NBTFloat(9012384.0)))
+		XCTAssertTrue(equal(stream.readPayload(type: .double), NBTDouble(80912894123122320)))
+		XCTAssertTrue(equal(stream.readPayload(type: .string), NBTString("Hello")))
+		XCTAssertTrue(equal(stream.readPayload(type: .list), NBTList(genericType: .float, elements: [])))
+		XCTAssertTrue(equal(stream.readPayload(type: .byteList), NBTList(bytes: [])))
+		XCTAssertTrue(equal(stream.readPayload(type: .intList), NBTList(ints: [])))
+		XCTAssertTrue(equal(stream.readPayload(type: .longList), NBTList(longs: [])))
+		XCTAssertTrue(equal(stream.readPayload(type: .compound), NBTCompound(contents: [:])))
 	}
 }
