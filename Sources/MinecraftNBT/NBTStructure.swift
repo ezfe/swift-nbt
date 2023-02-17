@@ -7,6 +7,7 @@
 
 import Foundation
 import DataTools
+import Gzip
 
 public struct NBTStructure {
 	public var tag: NBTCompound
@@ -17,6 +18,13 @@ public struct NBTStructure {
 			return nil
 		}
 		self.tag = tag
+	}
+	
+	public init?(compressed data: Data) {
+		guard data.isGzipped, let decompressed = try? data.gunzipped() else {
+			return nil
+		}
+		self.init(decompressed: decompressed)
 	}
 	
 	public init(tag: NBTCompound = NBTCompound()) {

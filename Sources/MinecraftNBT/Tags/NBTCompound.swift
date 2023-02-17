@@ -6,26 +6,16 @@
 //
 
 import DataTools
+import OrderedCollections
 
 public struct NBTCompound: Tag, DataStreamReadable, DataAccumulatorWritable {
-	public static func ==(lhs: NBTCompound, rhs: NBTCompound) -> Bool {
-		guard lhs.contents.count == rhs.contents.count else {
-			return false
-		}
-		for (key, value) in lhs.contents {
-			guard value.equal(to: rhs[key]) else {
-				return false
-			}
-		}
-		return true
-	}
-	
 	public let type = NBTTagType.compound
+	public let icon = "archivebox"
 	
-	public var contents: [String: any Tag]
-	public var keys: [String] { Array(contents.keys) }
+	public var contents: OrderedDictionary<String, any Tag>
+	public var children: OrderedDictionary<String, any Tag>? { contents }
 	
-	public init(contents: [String: any Tag] = [:]) {
+	public init(contents: OrderedDictionary<String, any Tag> = [:]) {
 		self.contents = contents
 	}
 
@@ -39,7 +29,7 @@ public struct NBTCompound: Tag, DataStreamReadable, DataAccumulatorWritable {
 	}
 	
 	public static func make(with stream: DataStream) -> NBTCompound? {
-		var contents = [String: any Tag]()
+		var contents = OrderedDictionary<String, any Tag>()
 		
 		while let typeInt = stream.read(Int8.self), let type = NBTTagType(rawValue: typeInt), type != .end {
 			guard let name = stream.read(String.self),
@@ -61,6 +51,25 @@ public struct NBTCompound: Tag, DataStreamReadable, DataAccumulatorWritable {
 			tag.append(to: accumulator)
 		}
 		NBTTagType.end.rawValue.append(to: accumulator)
+	}
+	
+	public static func ==(lhs: NBTCompound, rhs: NBTCompound) -> Bool {
+		guard lhs.contents.count == rhs.contents.count else {
+			return false
+		}
+		for (key, value) in lhs.contents {
+			guard value.equal(to: rhs[key]) else {
+				return false
+			}
+		}
+		return true
+	}
+
+	public func hash(into hasher: inout Hasher) {
+		for (key, value) in self.contents {
+			hasher.combine(key)
+			hasher.combine(value)
+		}
 	}
 	
 	public func description(indentation: UInt) -> String {

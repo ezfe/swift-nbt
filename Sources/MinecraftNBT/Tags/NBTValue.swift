@@ -6,12 +6,14 @@
 //
 
 import DataTools
+import OrderedCollections
 
 public protocol NBTLeafValue: Tag, DataStreamReadable, CustomStringConvertible {
 	
 }
 
 extension NBTLeafValue {
+	public var children: OrderedDictionary<String, any Tag>? { nil }
 	public func description(indentation: UInt = 0) -> String {
 		return "[\(type):\(self)]"
 	}
@@ -33,26 +35,33 @@ public typealias NBTString = String
 
 extension NBTByte: NBTLeafValue {
 	public var type: NBTTagType { .byte }
+	public var icon: String { "number" }
 }
 extension NBTShort: NBTLeafValue {
 	public var type: NBTTagType { .short }
+	public var icon: String { "number" }
 }
 extension NBTInt: NBTLeafValue {
 	public var type: NBTTagType { .int }
+	public var icon: String { "number" }
 }
 extension NBTLong: NBTLeafValue {
 	public var type: NBTTagType { .long }
+	public var icon: String { "number" }
 }
 
 extension NBTFloat: NBTLeafValue {
 	public var type: NBTTagType { .float }
+	public var icon: String { "number" }
 }
 extension NBTDouble: NBTLeafValue {
 	public var type: NBTTagType { .double }
+	public var icon: String { "number" }
 }
 
 extension NBTString: NBTLeafValue {
 	public var type: NBTTagType { .string }
+	public var icon: String { "textformat" }
 }
 
 // MARK: Resizability

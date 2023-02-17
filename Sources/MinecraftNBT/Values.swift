@@ -7,12 +7,14 @@
 
 import Foundation
 import DataTools
+import OrderedCollections
 
 // MARK:-
 
-public protocol Tag: DataAccumulatorWritable, CustomStringConvertible, Equatable {
+public protocol Tag: DataAccumulatorWritable, CustomStringConvertible, Equatable, Hashable {
 	var type: NBTTagType { get }
-	
+	var icon: String { get }
+	var children: OrderedDictionary<String, any Tag>? { get }
 	func description(indentation: UInt) -> String
 }
 
@@ -51,6 +53,31 @@ extension Tag {
 				return (self as? NBTList) == (otherTag as? NBTList)
 			case .compound:
 				return (self as? NBTCompound) == (otherTag as? NBTCompound)
+		}
+	}
+	
+	public func hash(into hasher: inout Hasher) {
+		switch self.type {
+			case .end:
+				fatalError("Found unexpected tag type `end`, which is not allowed")
+			case .byte:
+				(self as? NBTByte)?.hash(into: &hasher)
+			case .short:
+				(self as? NBTShort)?.hash(into: &hasher)
+			case .int:
+				(self as? NBTInt)?.hash(into: &hasher)
+			case .long:
+				(self as? NBTLong)?.hash(into: &hasher)
+			case .float:
+				(self as? NBTFloat)?.hash(into: &hasher)
+			case .double:
+				(self as? NBTDouble)?.hash(into: &hasher)
+			case .string:
+				(self as? NBTString)?.hash(into: &hasher)
+			case .list, .byteList, .intList, .longList:
+				(self as? NBTList)?.hash(into: &hasher)
+			case .compound:
+				(self as? NBTCompound)?.hash(into: &hasher)
 		}
 	}
 	

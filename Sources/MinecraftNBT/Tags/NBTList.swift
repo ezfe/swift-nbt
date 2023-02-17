@@ -6,6 +6,7 @@
 //
 
 import DataTools
+import OrderedCollections
 
 public struct NBTList: Tag {
 	public var type: NBTTagType {
@@ -20,9 +21,17 @@ public struct NBTList: Tag {
 				return .longList
 		}
 	}
+	public var icon = "list.bullet.clipboard"
 	
 	public var mode: ListMode
 	public var elements: [any Tag]
+	public var children: OrderedDictionary<String, any Tag>? {
+		var results = OrderedDictionary<String, any Tag>()
+		for (index, element) in elements.enumerated() {
+			results[String(index)] = element
+		}
+		return results
+	}
 	
 	init(genericType: NBTTagType, elements: [any Tag]) {
 		self.mode = .genericList(genericType)
@@ -144,6 +153,13 @@ public struct NBTList: Tag {
 		return true
 	}
 	
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(self.mode)
+		for tag in self.elements {
+			hasher.combine(tag)
+		}
+	}
+	
 	public func description(indentation: UInt) -> String {
 		var result = "[list<\(self.mode)>:"
 		for tag in self.elements {
@@ -153,7 +169,7 @@ public struct NBTList: Tag {
 		return result
 	}
 	
-	public enum ListMode: Equatable {
+	public enum ListMode: Equatable, Hashable {
 		case genericList(NBTTagType)
 		case byteList
 		case intList
