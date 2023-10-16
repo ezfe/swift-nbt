@@ -8,12 +8,12 @@
 import DataTools
 import OrderedCollections
 
-public protocol NBTLeafValue: Tag, DataStreamReadable, CustomStringConvertible {
+public protocol NBTLeafValue: NBTTag, DataStreamReadable, CustomStringConvertible {
 	
 }
 
 extension NBTLeafValue {
-	public var children: OrderedDictionary<String, any Tag>? { nil }
+	public var children: OrderedDictionary<String, any NBTTag>? { nil }
 	public func description(indentation: UInt = 0) -> String {
 		return "[\(type):\(self)]"
 	}

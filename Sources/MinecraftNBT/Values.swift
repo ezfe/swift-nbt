@@ -11,19 +11,19 @@ import OrderedCollections
 
 // MARK:-
 
-public protocol Tag: DataAccumulatorWritable, CustomStringConvertible, Equatable, Hashable {
+public protocol NBTTag: DataAccumulatorWritable, CustomStringConvertible, Equatable, Hashable {
 	var type: NBTTagType { get }
 	var icon: String { get }
-	var children: OrderedDictionary<String, any Tag>? { get }
+	var children: OrderedDictionary<String, any NBTTag>? { get }
 	func description(indentation: UInt) -> String
 }
 
-extension Tag {
+extension NBTTag {
 	internal func makeIndent(_ quantity: UInt) -> String {
 		return String(repeating: " ", count: 3 * Int(quantity))
 	}
 	
-	public func equal(to otherTag: (any Tag)?) -> Bool {
+	public func equal(to otherTag: (any NBTTag)?) -> Bool {
 		guard let otherTag else {
 			return false
 		}
@@ -86,7 +86,7 @@ extension Tag {
 	}
 }
 
-public func equal(_ lhs: (any Tag)?, _ rhs: (any Tag)?) -> Bool {
+public func equal(_ lhs: (any NBTTag)?, _ rhs: (any NBTTag)?) -> Bool {
 	if let lhs, let rhs {
 		return lhs.equal(to: rhs)
 	} else {

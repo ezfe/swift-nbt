@@ -8,7 +8,7 @@
 import DataTools
 import OrderedCollections
 
-public struct NBTList: Tag {
+public struct NBTList: NBTTag {
 	public var type: NBTTagType {
 		switch self.mode {
 			case .genericList(_):
@@ -24,16 +24,16 @@ public struct NBTList: Tag {
 	public var icon = "list.bullet.clipboard"
 	
 	public var mode: ListMode
-	public var elements: [any Tag]
-	public var children: OrderedDictionary<String, any Tag>? {
-		var results = OrderedDictionary<String, any Tag>()
+	public var elements: [any NBTTag]
+	public var children: OrderedDictionary<String, any NBTTag>? {
+		var results = OrderedDictionary<String, any NBTTag>()
 		for (index, element) in elements.enumerated() {
 			results[String(index)] = element
 		}
 		return results
 	}
 	
-	init(genericType: NBTTagType, elements: [any Tag]) {
+	init(genericType: NBTTagType, elements: [any NBTTag]) {
 		self.mode = .genericList(genericType)
 		self.elements = elements
 	}
@@ -78,7 +78,7 @@ public struct NBTList: Tag {
 			return nil
 		}
 		
-		var elements = [any Tag]()
+		var elements = [any NBTTag]()
 		elements.reserveCapacity(Int(length))
 		
 		for _ in 0..<length {

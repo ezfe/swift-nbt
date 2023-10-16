@@ -9,18 +9,18 @@ import Foundation
 import DataTools
 import OrderedCollections
 
-public struct NBTCompound: Tag, DataStreamReadable, DataAccumulatorWritable {
+public struct NBTCompound: NBTTag, DataStreamReadable, DataAccumulatorWritable {
 	public let type = NBTTagType.compound
 	public let icon = "archivebox"
 	
-	public var contents: OrderedDictionary<String, any Tag>
-	public var children: OrderedDictionary<String, any Tag>? { contents }
+	public var contents: OrderedDictionary<String, any NBTTag>
+	public var children: OrderedDictionary<String, any NBTTag>? { contents }
 	
-	public init(contents: OrderedDictionary<String, any Tag> = [:]) {
+	public init(contents: OrderedDictionary<String, any NBTTag> = [:]) {
 		self.contents = contents
 	}
 
-	public subscript(key: String) -> (any Tag)? {
+	public subscript(key: String) -> (any NBTTag)? {
 		set {
 			self.contents[key] = newValue
 		}
@@ -30,7 +30,7 @@ public struct NBTCompound: Tag, DataStreamReadable, DataAccumulatorWritable {
 	}
 	
 	public static func make(with stream: DataStream) -> NBTCompound? {
-		var contents = OrderedDictionary<String, any Tag>()
+		var contents = OrderedDictionary<String, any NBTTag>()
 		
 		while let typeInt = stream.read(Int8.self), let type = NBTTagType(rawValue: typeInt), type != .end {
 			guard let name = stream.read(String.self),

@@ -50,7 +50,7 @@ final class ValuesTests: XCTestCase {
 		let longList = NBTList(longs: [0x15341344, 0x34223425, 0x121234])
 		let compound = NBTCompound(contents: ["Hello": "World!"])
 		
-		let elements: [any Tag] = [byte, short, int, long, float, double, string, list, byteList, intList, longList, compound]
+		let elements: [any NBTTag] = [byte, short, int, long, float, double, string, list, byteList, intList, longList, compound]
 		for (i, l) in elements.enumerated() {
 			for (j, r) in elements.enumerated() {
 				if i == j {

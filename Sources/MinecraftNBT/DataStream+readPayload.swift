@@ -8,7 +8,7 @@
 import DataTools
 
 extension DataStream {
-	internal func readPayload(type: NBTTagType) -> (any Tag)? {
+	internal func readPayload(type: NBTTagType) -> (any NBTTag)? {
 		switch type {
 			case .end:
 				fatalError("Attempted to read tag type `end`, which is not allowed")
