@@ -33,7 +33,7 @@ public struct NBTList: NBTTag {
 		return results
 	}
 	
-	init(genericType: NBTTagType, elements: [any NBTTag]) {
+	public init(genericType: NBTTagType, elements: [any NBTTag]) {
 		self.mode = .genericList(genericType)
 		self.elements = elements
 	}
